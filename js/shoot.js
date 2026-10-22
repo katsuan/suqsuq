@@ -50,6 +50,8 @@ async function startCamera() {
     showShootMsg("この画面ではカメラを使えません。🖼 で写真を選べます。");
     return;
   }
+  // 読みこみ中：カメラが映るまで、画面のまん中に「準備中…」
+  showShootMsg("📷 カメラを準備中…");
   try {
     camStream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: state.facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
@@ -57,9 +59,10 @@ async function startCamera() {
     });
     camVideo.srcObject = camStream;
     await camVideo.play().catch(() => {});
+    $("shootMsg").hidden = true;
   } catch (err) {
     camStream = null;
-    showShootMsg("カメラを使えませんでした（カメラの許可を確かめてください）。🖼 で写真を選べます。");
+    showShootMsg("カメラを使えませんでした。カメラの許可を確かめてね。🖼 で写真も選べます。");
   }
 }
 function stopCamera() {
@@ -311,7 +314,7 @@ $("share").addEventListener("click", async () => {
     await navigator.share({ files: [file] });
     toast("✓ 共有できました");
   } catch (err) {
-    if (err?.name !== "AbortError") toast("共有できませんでした。⬇️ で保存してください");
+    if (err?.name !== "AbortError") toast("共有できませんでした。⬇️ で保存できます");
   }
 });
 // 加工なしも保存：共有できる端末は共有メニュー（写真へ保存など）、できなければダウンロード

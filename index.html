@@ -30,7 +30,7 @@
 <!-- Q キット（おくるんの共通部品）。色と字は style.css の :root で、すくすくのピーチに -->
 <link rel="stylesheet" href="https://katsuan.github.io/line-share/shared/ui.css">
 <script src="https://katsuan.github.io/line-share/shared/ui.js" defer></script>
-<link rel="stylesheet" href="style.css?v=202610221544">
+<link rel="stylesheet" href="style.css?v=202610221617">
 </head>
 <body class="ls-has-sendbar">
 <!-- はじめの画面：だれの・いつからを入れて、文字の形を決める -->
@@ -62,6 +62,8 @@
         <input id="due" class="ls-input date" type="date">
       </label>
     </div>
+    <!-- 日付がないままカメラ・写真を押したとき（欄のすぐ下に赤い文字で） -->
+    <p id="dateError" class="ls-hint is-error" hidden></p>
     <!-- いまの数え（大きく）と、つぎの節目 -->
     <div class="today" id="today" aria-live="polite"></div>
     <details class="ls-fold">
@@ -188,7 +190,6 @@
     </div>
   </section>
 
-  <p class="small-note">写真・動画はこの端末の中だけで作ります（サーバーには送りません）。</p>
   <!-- 「📤 すくすくを紹介する」と仲間のアイコン列：おくるんで紹介カードを送る窓口（line-share/shared/tool-share.js。中身は line-share/data/hub-links.json） -->
   <div data-tool-share></div>
 </main>
@@ -259,16 +260,13 @@
   </div>
 </div>
 
-<div id="toast" class="ls-toast" hidden></div>
-
 <!-- 動き（役ごとのファイル。この順に読む。いちばん先の core.js の頭に、ファイルの一覧） -->
-<script src="https://katsuan.github.io/line-share/shared/ui.js" defer></script>
-<script src="js/core.js?v=202610221544"></script>
-<script src="js/draw.js?v=202610221544"></script>
-<script src="js/setup.js?v=202610221544"></script>
-<script src="js/calendar.js?v=202610221544"></script>
-<script src="js/shoot.js?v=202610221544"></script>
-<script src="js/main.js?v=202610221544"></script>
+<script src="js/core.js?v=202610221617"></script>
+<script src="js/draw.js?v=202610221617"></script>
+<script src="js/setup.js?v=202610221617"></script>
+<script src="js/calendar.js?v=202610221617"></script>
+<script src="js/shoot.js?v=202610221617"></script>
+<script src="js/main.js?v=202610221617"></script>
 <!-- 電波がなくても開けるように（sw.js） -->
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});</script>
 <script src="https://katsuan.github.io/line-share/shared/tool-share.js" data-tool="suqsuq" defer></script>

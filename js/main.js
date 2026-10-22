@@ -7,10 +7,16 @@ bindCalendar();
 sizeStage();
 renderAll();
 fontsReady.then(renderAll);
-if (fromLink) {
-  save();
-  toast(`リンクから${fromLink}を入れました`);
-}
+if (fromLink) save();
+// Q キット（ui.js）は defer なので、読み終わってから知らせ・はじめての案内を出す
+document.addEventListener("DOMContentLoaded", () => {
+  if (fromLink) toast(`リンクから${fromLink}を入れました`);
+  window.LineShareUI?.firstTip(
+    "suqsuq",
+    ["生まれた日（おなかの中なら出産予定日）を入れると、数字が入ります", "🎨 で文字の形を選べます。見本の文字は指で動かせます", "📷 で撮るか 🖼 で写真を選ぶと、数字入りで残せます。写真はこの端末の中だけで作ります"],
+    document.querySelector(".ls-tabs")
+  );
+});
 
 // 毎フレーム描く：見えているほう（見本か撮る画面）だけ
 function frame(now) {

@@ -189,12 +189,7 @@ function nextMilestone(s = state) {
   return next ? `つぎの節目：${next.label}${next.note ? `（${next.note}）` : ""}まで あと${next.days}日` : "";
 }
 
-// 小さな知らせ（下に少し出して消える）
-let toastTimer = 0;
+// 小さな知らせ（下に少し出して消える）。Q キットのトースト（新しいのが来たら前のは消える）
 function toast(msg) {
-  const el = $("toast");
-  el.textContent = msg;
-  el.hidden = false;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (el.hidden = true), 2600);
+  window.LineShareUI?.toast(msg, { ms: 2600 });
 }

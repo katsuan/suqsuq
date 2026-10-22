@@ -202,7 +202,7 @@ function renderDesign() {
   });
   if (state.myLooks.length < 8) {
     my.append(chip("＋ いまの形を保存", false, async () => {
-      const name = await LineShareUI.ask({ title: "名前をつけてください", text: "例：100日の記念", input: `${tplOf(look.tpl).label}${state.myLooks.length + 1}`, ok: "保存", maxLength: 12 });
+      const name = await LineShareUI.ask({ title: "名前をつけてね", text: "例：100日の記念", input: `${tplOf(look.tpl).label}${state.myLooks.length + 1}`, ok: "保存", maxLength: 12 });
       if (!name) return;
       state.myLooks.push({ name: name.slice(0, 12), look: JSON.parse(JSON.stringify(look)) });
       lookChanged();
@@ -219,6 +219,7 @@ function renderStatsMeta() {
 // いまの数え（大きく）と、つぎの節目
 function renderToday() {
   const L = countLabel();
+  if (L) $("dateError").hidden = true;
   const box = $("today");
   if (!L) {
     box.innerHTML = `<p class="ls-hint">${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れると、ここに数えた日が出ます。</p>`;
@@ -245,7 +246,8 @@ function needDate() {
   input.scrollIntoView({ behavior: "smooth", block: "center" });
   input.classList.add("is-need");
   setTimeout(() => input.classList.remove("is-need"), 1600);
-  toast(`さきに${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れてください`);
+  $("dateError").textContent = `さきに${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れてね`;
+  $("dateError").hidden = false;
   return true;
 }
 
