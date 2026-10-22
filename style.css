@@ -44,6 +44,9 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .today-main b { font-size: 34px; color: var(--accent); margin: 0 2px; font-variant-numeric: tabular-nums; }
 .today .ls-hint { margin: 0; }
 
+/* うまれたときの記録 */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
 /* 節目をカレンダーに */
 .cal-list { display: grid; gap: 6px; max-height: 320px; overflow-y: auto; }
 .cal-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--ls-surface-sub, #faf7f5); }
@@ -83,18 +86,25 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .shoot-stage .stage { position: absolute; max-width: none; max-height: none; box-shadow: none; border-radius: 10px; }
 .stage.is-flash { animation: flash 0.35s ease-out; }
 @keyframes flash { from { filter: brightness(2.2); } to { filter: none; } }
+/* 構図のガイド（前の写真をうっすら）と、セルフタイマーの数字 */
+.guide { position: absolute; object-fit: cover; opacity: 0.35; border-radius: 10px; pointer-events: none; }
+.countdown { position: absolute; margin: 0; font-size: 120px; font-weight: 800; color: #fff; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); pointer-events: none; }
+.round.small-label { display: grid; place-items: center; align-content: center; gap: 0; width: 52px; height: 52px; font-size: 18px; line-height: 1; }
+.round.small-label small { font-size: 10px; font-weight: 800; margin-top: 2px; }
+.round.is-on { background: #fff; color: var(--ink); }
 .rec-time { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); margin: 0; padding: 4px 12px; border-radius: 999px; background: #e53935; font-weight: 800; font-variant-numeric: tabular-nums; }
 .shoot-msg, .drag-hint { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; padding: 10px 16px; border-radius: 14px; background: rgba(0, 0, 0, 0.7); font-size: 14px; line-height: 1.6; text-align: center; width: max-content; max-width: calc(100% - 40px); pointer-events: none; }
 .shoot-msg { top: 40%; }
 .drag-hint { bottom: 16px; }
-.shoot-bottom { display: flex; align-items: center; justify-content: space-around; padding: 10px 16px max(14px, env(safe-area-inset-bottom, 0px)); }
+.shoot-bottom { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 10px 16px max(14px, env(safe-area-inset-bottom, 0px)); }
 .shutter { width: 76px; height: 76px; padding: 0; border: 5px solid #fff; border-radius: 50%; background: transparent; display: grid; place-items: center; cursor: pointer; }
 .shutter span { width: 58px; height: 58px; border-radius: 50%; background: #fff; transition: all 0.2s; }
 .shutter.is-video span { background: #e53935; }
 .shoot.is-recording .shutter span { width: 30px; height: 30px; border-radius: 8px; }
 .shoot.is-recording .stage { outline: 4px solid #e53935; }
 /* 録画中は、切りかえのボタンを消す */
-.shoot.is-recording :is(#shootHome, .seg, #aspect, #designOpen, #sound, #shootPick, #flip) { visibility: hidden; }
+.shoot.is-recording :is(#shootHome, .seg, #aspect, #designOpen, #sound, #shootPick, #flip, #timerBtn) { visibility: hidden; }
+.ls-swatch.is-custom input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
 /* 文字の形のシート（下から。映像は上に見えたまま） */
 .design-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; max-height: 52vh; display: grid; grid-template-rows: auto minmax(0, 1fr); border-radius: 20px 20px 0 0; background: #fff; color: var(--ink); box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3); padding-bottom: env(safe-area-inset-bottom, 0px); }

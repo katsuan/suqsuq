@@ -6,7 +6,7 @@
 アイコンはおくるんと同じ角の丸い四角に、やわらかいピーチ色。Q の輪のてっぺんから、ふたばの芽（すくすく育つ）。
 
   icon.svg・icon-32.png・apple-touch-icon.png・icon-512.png・icon-maskable-512.png … アイコン
-  logo.svg … 横長のロゴ「SuQSuQ」（1つ目の Q はアイコンと同じふたばの芽、2つ目はメジャー（目盛りのテープがしっぽ）。S・u は Jua）
+  logo.svg … 横長のロゴ「SuQSuQ」（1つ目の Q はメジャー（目盛りのテープが「Su」の下を通って次の Q の手前まで）、最後の Q はアイコンと同じふたばの芽。S・u は Jua）
   ogp.png  … 共有したときの画像（1200×630）
 
 使い方: python3 tools/icon.py（となりのおくるん（q-oqrn）の tools/brandkit.py を使う）
@@ -67,27 +67,51 @@ def band(a, b, half):
     return [(a[0] + nx, a[1] + ny), (b[0] + nx, b[1] + ny), (b[0] - nx, b[1] - ny), (a[0] - nx, a[1] - ny)]
 
 
+def tape_reach():
+    """ロゴで、1つ目の Q（メジャー）の真ん中から、2つ目の Q の輪の左はしまでの長さ（アイコンの座標で）。
+    brandkit.logo_svg と同じ決まり（字の高さ＝輪の直径、字のあいだは高さの 0.09）で「S」「u」の幅を足す"""
+    from brandkit import FONT_PATH
+    from fontTools.pens.boundsPen import BoundsPen
+    from fontTools.ttLib import TTFont
+
+    font = TTFont(str(FONT_PATH))
+    glyphs, cmap = font.getGlyphSet(), font.getBestCmap()
+
+    def bounds(ch):
+        pen = BoundsPen(glyphs)
+        glyphs[cmap[ord(ch)]].draw(pen)
+        return pen.bounds
+
+    h = bounds("I")[3] - bounds("I")[1]
+    k = (h / 2) / RING_OUTER
+    gap = h * 0.09
+    dist = RING_OUTER * k + gap + sum(bounds(ch)[2] - bounds(ch)[0] + gap for ch in "Su")
+    return dist / k
+
+
 def build_tape():
-    """ロゴの2つ目の Q：メジャー（すくすく育つのを測る）。輪はケース、しっぽは引き出したテープ（目盛りつき）と先の金具。
+    """ロゴの1つ目の Q：メジャー（すくすく育つのを測る）。輪はケース、その下から引き出したテープ（目盛りつき）が
+    「Su」の下を通って、2つ目の Q（ふたばの芽）の手前まで。テープは "free"（次の字の位置をずらさない）。
     輪の中心・太さはふたばの Q と同じ（ロゴで同じ大きさに並ぶように）。ふたばの Q と同じだけずらす"""
     c = C0
-    half = RING_W / 2 + 0.5
-    start, end = R - 2, R + 24  # テープの、輪の中心からの距離
+    top = c[1] + RING_OUTER - 1.5  # テープの上（ケースの下にふれる）
+    bottom = top + 8
+    x0, x1 = c[0] - 4, c[0] + tape_reach() - 3  # 2つ目の Q の少し手前まで
     tape = [
         {"t": "circle", "c": c, "r": R, "alpha": 0.16},  # 輪の内側（うっすら）
-        {"t": "poly", "p": band(polar(c, TAIL_DIR, start), polar(c, TAIL_DIR, end), half)},  # テープ
+        {"t": "rect", "box": (x0, top, x1, bottom), "rx": 1.5, "free": True},  # テープ
+        {"t": "rect", "box": (x1 - 1, top - 3, x1 + 2.5, bottom + 3), "rx": 1, "free": True},  # 先の金具
         {"t": "ring", "c": c, "r": R, "w": RING_W},  # ケース（Q の輪）
         {"t": "circle", "c": c, "r": 6},  # まんなかの軸
         {"t": "circle", "c": c, "r": 2.2, "fill": "bg"},  # 軸のねじ
-        {"t": "poly", "p": band(polar(c, TAIL_DIR, end - 1), polar(c, TAIL_DIR, end + 2.5), half + 2.5)},  # 先の金具
     ]
-    # 目盛り：テープの片がわから、長い・短いを交互に
-    for i, dist in enumerate(range(R + 7, end - 1, 4)):
-        p = polar(c, TAIL_DIR, dist)
-        edge = polar(p, TAIL_DIR - 90, half)
-        tip = polar(edge, TAIL_DIR + 90, half * (1.1 if i % 2 == 0 else 0.6))
-        tape.append({"t": "line", "p": [edge, tip], "w": 1.8, "fill": "bg"})
-    return [{**sh, **({"c": (sh["c"][0] + _DX, sh["c"][1] + _DY)} if "c" in sh else {}), **({"p": [(x + _DX, y + _DY) for x, y in sh["p"]]} if "p" in sh else {})} for sh in tape]
+    # 目盛り：テープの上のふちから、長い（10ごと）・短いを交互に。ケースの右から
+    x, i = c[0] + RING_OUTER + 3, 0
+    while x < x1 - 3:
+        tape.append({"t": "line", "p": [(x, top + 1.2), (x, top + (5 if i % 2 == 0 else 3))], "w": 1.4, "fill": "bg", "free": True})
+        x += 4
+        i += 1
+    return [{**sh, **({"c": (sh["c"][0] + _DX, sh["c"][1] + _DY)} if "c" in sh else {}), **({"p": [(px + _DX, py + _DY) for px, py in sh["p"]]} if "p" in sh else {}), **({"box": (sh["box"][0] + _DX, sh["box"][1] + _DY, sh["box"][2] + _DX, sh["box"][3] + _DY)} if "box" in sh else {})} for sh in tape]
 
 
 TAPE = build_tape()
@@ -95,7 +119,7 @@ TAPE = build_tape()
 
 def main():
     BRAND.write_icons(ROOT, SHAPES)
-    logo, ratio = BRAND.logo_svg("SuQSuQ", [SHAPES, TAPE], C, RING_OUTER, "SuQSuQ（すくすく）")  # 1つ目の Q はふたばの芽、2つ目はメジャー
+    logo, ratio = BRAND.logo_svg("SuQSuQ", [TAPE, SHAPES], C, RING_OUTER, "SuQSuQ（すくすく）")  # 1つ目の Q はメジャー、2つ目（最後）はアイコンと同じふたばの芽
     (ROOT / "logo.svg").write_text(logo, encoding="utf-8")
     BRAND.write_ogp(
         ROOT / "ogp.png", SHAPES, "すくすく", "SuQSuQ",

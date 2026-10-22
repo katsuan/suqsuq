@@ -58,6 +58,18 @@
         <input id="due" class="ls-input date" type="date">
       </label>
     </div>
+    <!-- うまれたときの記録（バースフォトの定番：時刻・体重・身長）。入れたものだけ写真に -->
+    <details class="ls-fold" data-mode-only="born">
+      <summary><span class="ls-fold-icon">👶</span><span class="fold-title">うまれたときの記録</span><span class="ls-fold-meta" id="statsMeta"></span></summary>
+      <div class="ls-fold-body fold-pad">
+        <p class="ls-hint">入れると、写真の数字の下に「3,120g ・ 49.5cm ・ 4:32 生まれ」のように入ります（「いっしょに入れる」で消せます）。</p>
+        <div class="stats">
+          <label class="ls-field"><span class="ls-label">時刻</span><input id="bTime" class="ls-input date" type="time"></label>
+          <label class="ls-field"><span class="ls-label">体重（g）</span><input id="bWeight" class="ls-input" inputmode="numeric" maxlength="5" placeholder="3120"></label>
+          <label class="ls-field"><span class="ls-label">身長（cm）</span><input id="bLength" class="ls-input" inputmode="decimal" maxlength="5" placeholder="49.5"></label>
+        </div>
+      </div>
+    </details>
     <!-- いまの数え（大きく）と、つぎの節目 -->
     <div class="today" id="today" aria-live="polite"></div>
     <details class="ls-fold">
@@ -98,6 +110,10 @@
       <canvas id="preview" class="stage" aria-label="見本"></canvas>
     </div>
     <div id="design" class="design">
+      <label class="ls-field">
+        <span class="ls-label">ひとこと <small>（好きな文字。数字の上に入る）</small></span>
+        <input id="memo" class="ls-input" maxlength="24" placeholder="例：はじめての寝がえり" autocomplete="off">
+      </label>
       <div class="ls-field">
         <span class="ls-label">表示</span>
         <div class="ls-chips" id="fmtChips"></div>
@@ -149,6 +165,7 @@
   </div>
 </div>
 <input id="pickFile" type="file" accept="image/*" hidden>
+<input id="guideFile" type="file" accept="image/*" hidden>
 
 <!-- 撮る画面：映像と文字を1つのキャンバスに描き、写真はそのまま画像に、動画はキャンバスを録る -->
 <section id="shoot" class="shoot" hidden>
@@ -164,13 +181,18 @@
   </div>
   <div class="shoot-stage">
     <canvas id="stage" class="stage"></canvas>
+    <!-- 構図のガイド：前に撮った写真をうっすら重ねる（画面に重ねるだけで、写真・動画には入らない） -->
+    <img id="guide" class="guide" alt="" hidden>
+    <p id="countdown" class="countdown" hidden></p>
     <p id="recTime" class="rec-time" hidden>0:00</p>
     <p id="shootMsg" class="shoot-msg" hidden></p>
     <p id="dragHint" class="drag-hint" hidden>文字は指で動かせます</p>
   </div>
   <div class="shoot-bottom">
     <button id="shootPick" class="round" type="button" aria-label="写真を選ぶ">🖼</button>
+    <button id="guideBtn" class="round small-label" type="button" aria-label="前の写真をうっすら重ねる">◐<small>重ねる</small></button>
     <button id="shutter" class="shutter" type="button" aria-label="撮る"><span></span></button>
+    <button id="timerBtn" class="round small-label" type="button" aria-label="セルフタイマー">⏱<small>なし</small></button>
     <button id="flip" class="round" type="button" aria-label="カメラを切りかえる">🔄</button>
   </div>
   <!-- 文字の形のシート（はじめの画面の #design をここに移す） -->

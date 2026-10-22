@@ -61,6 +61,24 @@ function renderDesign() {
     });
     colors.append(b);
   }
+  // カスタム：好きな色（色見本を押すと、端末の色えらびが開く）
+  const custom = !LOOK_COLORS.includes(look.color);
+  const cb = document.createElement("label");
+  cb.className = `ls-swatch is-custom${custom ? " is-selected" : ""}`;
+  cb.style.setProperty("--swatch", look.color);
+  cb.title = "好きな色";
+  const picker = Object.assign(document.createElement("input"), { type: "color", value: look.color });
+  picker.setAttribute("aria-label", "好きな色");
+  picker.addEventListener("input", () => {
+    look.color = picker.value;
+    cb.classList.add("is-selected");
+    cb.style.setProperty("--swatch", picker.value);
+    colors.querySelectorAll("button.ls-swatch").forEach((x) => x.setAttribute("aria-pressed", "false"));
+    save();
+  });
+  picker.addEventListener("change", lookChanged);
+  cb.append(picker);
+  colors.append(cb);
   $("size").value = look.size;
   $("size").disabled = tplOf(look.tpl).fixed;
   $("center").disabled = tplOf(look.tpl).fixed;
@@ -76,6 +94,12 @@ function renderDesign() {
       lookChanged();
     })
   );
+  if (state.mode === "born") {
+    extra.append(chip("うまれたときの記録", look.showStats, () => {
+      look.showStats = !look.showStats;
+      lookChanged();
+    }));
+  }
 
   const stamps = $("stampChips");
   stamps.replaceChildren();
@@ -132,6 +156,11 @@ function renderDesign() {
       toast("マイテンプレートに保存しました（長押しで消せます）");
     }, "is-add"));
   }
+}
+
+// うまれたときの記録の見出しの右（入れたものを短く）
+function renderStatsMeta() {
+  $("statsMeta").textContent = statsText({ ...state, mode: "born", look: { showStats: true } }) || "";
 }
 
 // いまの数え（大きく）と、つぎの節目
@@ -237,6 +266,20 @@ function bindSetup() {
     })
   );
   $("name").value = state.name;
+  $("memo").value = state.memo;
+  $("memo").addEventListener("input", () => {
+    state.memo = $("memo").value;
+    save();
+  });
+  for (const id of ["bTime", "bWeight", "bLength"]) {
+    $(id).value = state[id];
+    $(id).addEventListener("input", () => {
+      state[id] = $(id).value.trim();
+      save();
+      renderStatsMeta();
+    });
+  }
+  renderStatsMeta();
   $("birth").value = state.birth;
   $("due").value = state.due;
   $("dayOne").checked = state.dayOne;

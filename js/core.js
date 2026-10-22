@@ -48,7 +48,7 @@ const state = {
   fmtWomb: saved.fmtWomb || "weeks",
   // 文字の形（テンプレート・色・位置・大きさ・いっしょに入れるもの・スタンプ・動き）。マイテンプレートにはこのまとまりを覚える
   look: Object.assign(
-    { tpl: "fuwari", color: "#e9735a", x: null, y: null, size: 1, showName: true, showDate: true, stamps: ["sparkle"], motion: "float" },
+    { tpl: "fuwari", color: "#e9735a", x: null, y: null, size: 1, showName: true, showDate: true, showStats: true, stamps: ["sparkle"], motion: "float" },
     saved.look || {}
   ),
   myLooks: Array.isArray(saved.myLooks) ? saved.myLooks : [],
@@ -56,6 +56,11 @@ const state = {
   kind: saved.kind === "video" ? "video" : "photo",
   facing: saved.facing === "user" ? "user" : "environment",
   sound: saved.sound !== false, // 動画に音も入れる
+  memo: saved.memo || "", // ひとこと（写真に入れる好きな文字）
+  bTime: saved.bTime || "", // うまれたときの記録：時刻・体重（g）・身長（cm）
+  bWeight: saved.bWeight || "",
+  bLength: saved.bLength || "",
+  timer: [0, 3, 10].includes(saved.timer) ? saved.timer : 0, // セルフタイマー（秒）
   remind: saved.remind || "morning", // 節目のお知らせ（js/calendar.js の REMINDS）
   calWeekly: saved.calWeekly === true // おなかの中：毎週の◯週もカレンダーに
 };
@@ -102,8 +107,20 @@ const FORMATS = {
 };
 
 // いまの設定で、写真に入れる文字のまとまりを作る。null は日付がまだないとき
-// { top: 上の小さな行, big: 大きな数字, unit: 数字のとなり, small: さらに小さく, num: 数えあげる数（動き用）, foot: 名前・日付 }
+// { memo: ひとこと, top: 上の小さな行, big: 大きな数字, unit: 数字のとなり, small: さらに小さく, num: 数えあげる数（動き用）,
+//   stats: うまれたときの記録, foot: 名前・日付 }
 function countLabel(s = state) {
+  const L = baseLabel(s);
+  return L && { ...L, memo: s.memo || "", stats: statsText(s) };
+}
+// うまれたときの記録（3,120g ・ 49.5cm ・ 4:32 生まれ）。生まれてからのときだけ
+function statsText(s = state) {
+  if (s.mode !== "born" || !s.look.showStats) return "";
+  const w = Number(String(s.bWeight).replace(/[^\d.]/g, ""));
+  const l = Number(String(s.bLength).replace(/[^\d.]/g, ""));
+  return [w ? `${Math.round(w).toLocaleString("ja-JP")}g` : "", l ? `${l}cm` : "", s.bTime ? `${s.bTime.replace(/^0(?=\d)/, "")} 生まれ` : ""].filter(Boolean).join(" ・ ");
+}
+function baseLabel(s) {
   const dayStr = s.day || todayStr();
   const day = parseDay(dayStr);
   const foot = [s.look.showName ? s.name : "", s.look.showDate ? dotDay(dayStr) : ""].filter(Boolean).join("  ");

@@ -27,6 +27,8 @@ function fitStage() {
   const s = Math.min((box.width - 16) / c.width, box.height / c.height);
   c.style.width = `${Math.floor(c.width * s)}px`;
   c.style.height = `${Math.floor(c.height * s)}px`;
+  $("guide").style.width = c.style.width; // 構図のガイドも同じ大きさで重ねる
+  $("guide").style.height = c.style.height;
 }
 window.addEventListener("resize", fitStage);
 window.visualViewport?.addEventListener("resize", fitStage);
@@ -91,6 +93,7 @@ function openShoot() {
 }
 function closeShoot() {
   if (recorder) return;
+  cancelCountdown();
   closeDesign();
   stopCamera();
   micStream?.getTracks().forEach((t) => t.stop());
@@ -204,6 +207,31 @@ function renderRecording() {
   if (on) closeDesign();
 }
 
+// ---- セルフタイマー ----
+let countdown = 0;
+function renderTimer() {
+  $("timerBtn").querySelector("small").textContent = state.timer ? `${state.timer}秒` : "なし";
+  $("timerBtn").classList.toggle("is-on", !!state.timer);
+}
+function startCountdown(sec, go) {
+  let left = sec;
+  $("countdown").textContent = left;
+  $("countdown").hidden = false;
+  $("shoot").classList.add("is-counting");
+  countdown = setInterval(() => {
+    left -= 1;
+    if (left > 0) return ($("countdown").textContent = left);
+    cancelCountdown();
+    go();
+  }, 1000);
+}
+function cancelCountdown() {
+  clearInterval(countdown);
+  countdown = 0;
+  $("countdown").hidden = true;
+  $("shoot").classList.remove("is-counting");
+}
+
 // ---- できた写真・動画 ----
 function showResult(blob, name) {
   if (lastResult) URL.revokeObjectURL(lastResult.url);
@@ -287,9 +315,39 @@ function bindShoot() {
     })
   );
   $("shutter").addEventListener("click", () => {
-    if (state.kind === "photo") return takePhoto();
-    if (recorder) stopRecording();
-    else startRecording();
+    if (countdown) return cancelCountdown(); // タイマーの途中で押したら、やめる
+    if (recorder) return stopRecording();
+    const go = state.kind === "photo" ? takePhoto : startRecording;
+    if (state.timer) startCountdown(state.timer, go);
+    else go();
+  });
+  // セルフタイマー：なし → 3秒 → 10秒（写真も、動画の録りはじめも）
+  $("timerBtn").addEventListener("click", () => {
+    state.timer = state.timer === 0 ? 3 : state.timer === 3 ? 10 : 0;
+    save();
+    renderTimer();
+    toast(state.timer ? `⏱ ${state.timer}秒後に${state.kind === "photo" ? "撮ります" : "録りはじめます"}` : "セルフタイマーなし");
+  });
+  renderTimer();
+  // 構図のガイド：前に撮った写真を選んで、うっすら重ねる（同じ向き・同じ大きさで撮りやすく）。もう一度押すと消す
+  $("guideBtn").addEventListener("click", () => {
+    if (!$("guide").hidden) {
+      $("guide").hidden = true;
+      $("guide").removeAttribute("src");
+      $("guideBtn").classList.remove("is-on");
+      return;
+    }
+    $("guideFile").value = "";
+    $("guideFile").click();
+  });
+  $("guideFile").addEventListener("change", () => {
+    const file = $("guideFile").files?.[0];
+    if (!file) return;
+    $("guide").src = URL.createObjectURL(file);
+    $("guide").hidden = false;
+    $("guideBtn").classList.add("is-on");
+    fitStage();
+    toast("前の写真をうっすら重ねました（写真・動画には入りません）");
   });
   $("sound").addEventListener("click", () => {
     if (recorder) return;

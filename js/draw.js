@@ -323,13 +323,16 @@ function layoutRows(ctx, tpl, label, k) {
     ctx.font = fontFor(tpl, name, size, text);
     return { name, text, size, font: ctx.font, w: ctx.measureText(text).width };
   };
+  // memo（ひとこと）は上の行と同じ字の形、stats（うまれたときの記録）は下の行と同じ字の形。kind で見分ける
   const rows = [];
-  if (label.top) rows.push({ parts: [part("top", label.top)], gap: 0 });
+  if (label.memo) rows.push({ parts: [part("top", label.memo)], gap: 0, kind: "memo" });
+  if (label.top) rows.push({ parts: [part("top", label.top)], gap: 0, kind: "top" });
   const mid = [part("big", label.big)];
   if (label.unit) mid.push(part("unit", label.unit));
   if (label.small) mid.push(part("small", label.small));
   rows.push({ parts: mid, gap: 0.12, main: true });
-  if (label.foot) rows.push({ parts: [part("foot", label.foot)], gap: 0 });
+  if (label.stats) rows.push({ parts: [part("foot", label.stats)], gap: 0, kind: "stats" });
+  if (label.foot) rows.push({ parts: [part("foot", label.foot)], gap: 0, kind: "foot" });
   for (const r of rows) {
     const space = r.main ? tpl.sz.unit * k * 0.12 : 0;
     r.w = r.parts.reduce((a, p) => a + p.w, 0) + space * (r.parts.length - 1);
@@ -415,7 +418,7 @@ function drawLabel(ctx, W, H, look, label, t, still) {
   } else {
     const [px, py] = look.x == null ? tpl.pos : [look.x, look.y];
     // 飾りごと画面の中におさめる（はしに寄せても切れない）
-    const hw = tpl.circle ? Math.max(bw, bh) / 2 + 60 * k : bw / 2 + 20 * k;
+    const hw = tpl.circle ? badgeR(bw, bh, k) + 4 * k : bw / 2 + 20 * k;
     const hh = tpl.circle ? hw : bh / 2 + 20 * k;
     const fit = (v, half, size) => (half * 2 >= size ? size / 2 : Math.min(size - half, Math.max(half, v)));
     cx = fit(px * W, hw, W);
@@ -458,7 +461,7 @@ function drawLabel(ctx, W, H, look, label, t, still) {
     ctx.restore();
   }
   if (tpl.circle) {
-    const r = Math.max(bw, bh) / 2 + 56 * k;
+    const r = badgeR(bw, bh, k);
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,0.25)";
     ctx.shadowBlur = 24 * k;
@@ -492,7 +495,7 @@ function drawLabel(ctx, W, H, look, label, t, still) {
     const baseline = y + lh * (r.main ? 0.86 : 0.8);
     let x = -r.w / 2;
     // ポップ：上の行は色の帯の中に白い字
-    if (tpl.topPill && r.parts[0].name === "top") {
+    if (tpl.topPill && r.kind === "top") {
       ctx.save();
       ctx.fillStyle = tpl.stroke(color);
       const ph = r.h * 1.3;
@@ -506,7 +509,7 @@ function drawLabel(ctx, W, H, look, label, t, still) {
       continue;
     }
     // エレガント：上の行の左右に細い線
-    if (tpl.rules && r.parts[0].name === "top") {
+    if (tpl.rules && r.kind === "top") {
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth = 3 * k;
@@ -537,6 +540,9 @@ function drawLabel(ctx, W, H, look, label, t, still) {
   ctx.restore();
   return { x: cx - bw / 2 - padX, y: cy - bh / 2 - padY, w: bw + padX * 2, h: bh + padY * 2, fixed: !!tpl.fixed };
 }
+
+// まるバッジの丸の半径：文字のまとまりの四すみが入る大きさ（対角線の半分）に少し余白
+const badgeR = (bw, bh, k) => Math.hypot(bw, bh) / 2 + 26 * k;
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
