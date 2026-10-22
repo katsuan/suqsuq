@@ -66,6 +66,25 @@ const state = {
   remind: saved.remind || "morning", // 節目のお知らせ（js/calendar.js の REMINDS）
   calWeekly: saved.calWeekly === true // おなかの中：毎週の◯週もカレンダーに
 };
+// リンクで日付を受けとる（くろのすの「すくすくで写真に入れる」など）：?birth=2026-07-14 ／ ?due=2027-03-01 ／ &name=はると
+// 受けとったら覚えて、アドレスからは消す（再読みこみで上書きしないように）
+const fromLink = (() => {
+  const q = new URLSearchParams(location.search);
+  const ok = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "") && !isNaN(parseDay(v));
+  let got = "";
+  if (ok(q.get("birth"))) {
+    state.mode = "born";
+    state.birth = q.get("birth");
+    got = "生まれた日";
+  } else if (ok(q.get("due"))) {
+    state.mode = "womb";
+    state.due = q.get("due");
+    got = "出産予定日";
+  }
+  if (got && q.get("name")) state.name = q.get("name").slice(0, 16);
+  if (q.has("birth") || q.has("due") || q.has("name")) history.replaceState(null, "", location.pathname);
+  return got;
+})();
 const save = () => {
   try {
     const { day, ...rest } = state;

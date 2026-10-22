@@ -7,6 +7,10 @@ bindCalendar();
 sizeStage();
 renderAll();
 fontsReady.then(renderAll);
+if (fromLink) {
+  save();
+  toast(`リンクから${fromLink}を入れました`);
+}
 
 // 毎フレーム描く：見えているほう（見本か撮る画面）だけ
 function frame(now) {

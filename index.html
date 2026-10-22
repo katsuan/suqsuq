@@ -5,21 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>すくすく｜成長の記念日フォト</title>
 <meta name="description" content="すくすく（SuQSuQ）。生まれて◯日・生後◯か月・妊娠◯週を、写真や動画にそのまま入れて残せます。文字の形・位置・動くスタンプも選べます。">
-<!-- 確認がすむまで、検索に出さない -->
-<meta name="robots" content="noindex, nofollow">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="すくすく（SuQSuQ）">
 <meta property="og:title" content="すくすく｜成長の記念日フォト">
 <meta property="og:description" content="生まれて◯日・妊娠◯週を、写真と動画にそのまま入れて残せます">
+<meta property="og:url" content="https://katsuan.github.io/suqsuq/">
 <meta property="og:locale" content="ja_JP">
-<meta property="og:image" content="ogp.png">
+<meta property="og:image" content="https://katsuan.github.io/suqsuq/ogp.png?v=20261023">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="すくすく（SuQSuQ）：生まれて◯日・妊娠◯週を、写真と動画にそのまま入れて残せる">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#fff7f3" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16151a" media="(prefers-color-scheme: dark)">
 <!-- アイコン・ロゴ・OGP は tools/icon.py で作る -->
-<link rel="icon" href="icon.svg?v=202610221419" type="image/svg+xml">
-<link rel="icon" href="icon-32.png?v=202610221419" type="image/png" sizes="32x32">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=202610221419">
+<link rel="icon" href="icon.svg?v=202610221544" type="image/svg+xml">
+<link rel="icon" href="icon-32.png?v=202610221544" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=202610221544">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,14 +30,14 @@
 <!-- Q キット（おくるんの共通部品）。色と字は style.css の :root で、すくすくのピーチに -->
 <link rel="stylesheet" href="https://katsuan.github.io/line-share/shared/ui.css">
 <script src="https://katsuan.github.io/line-share/shared/ui.js" defer></script>
-<link rel="stylesheet" href="style.css?v=202610221446">
+<link rel="stylesheet" href="style.css?v=202610221544">
 </head>
 <body class="ls-has-sendbar">
 <!-- はじめの画面：だれの・いつからを入れて、文字の形を決める -->
 <main id="setup" class="setup">
   <div class="ls-brand">
-    <h1 class="ls-brand-name"><img class="ls-brand-icon" src="icon.svg?v=202610221419" alt="" width="28" height="28">すくすく</h1>
-    <img class="ls-brand-logo" src="logo.svg?v=202610221419" alt="SuQ²（SuQSuQ）" height="28">
+    <h1 class="ls-brand-name"><img class="ls-brand-icon" src="icon.svg?v=202610221544" alt="" width="28" height="28">すくすく</h1>
+    <img class="ls-brand-logo" src="logo.svg?v=202610221544" alt="SuQ²（SuQSuQ）" height="28">
   </div>
   <p class="ls-brand-copy">すくすく、まいにちが記念日</p>
 
@@ -187,6 +189,8 @@
   </section>
 
   <p class="small-note">写真・動画はこの端末の中だけで作ります（サーバーには送りません）。</p>
+  <!-- 「📤 すくすくを紹介する」と仲間のアイコン列：おくるんで紹介カードを送る窓口（line-share/shared/tool-share.js。中身は line-share/data/hub-links.json） -->
+  <div data-tool-share></div>
 </main>
 
 <!-- 下に固定：カメラを開く・写真を選ぶ -->
@@ -258,13 +262,15 @@
 <div id="toast" class="ls-toast" hidden></div>
 
 <!-- 動き（役ごとのファイル。この順に読む。いちばん先の core.js の頭に、ファイルの一覧） -->
-<script src="js/core.js?v=202610221446"></script>
-<script src="js/draw.js?v=202610221446"></script>
-<script src="js/setup.js?v=202610221446"></script>
-<script src="js/calendar.js?v=202610221446"></script>
-<script src="js/shoot.js?v=202610221446"></script>
-<script src="js/main.js?v=202610221446"></script>
+<script src="https://katsuan.github.io/line-share/shared/ui.js" defer></script>
+<script src="js/core.js?v=202610221544"></script>
+<script src="js/draw.js?v=202610221544"></script>
+<script src="js/setup.js?v=202610221544"></script>
+<script src="js/calendar.js?v=202610221544"></script>
+<script src="js/shoot.js?v=202610221544"></script>
+<script src="js/main.js?v=202610221544"></script>
 <!-- 電波がなくても開けるように（sw.js） -->
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});</script>
+<script src="https://katsuan.github.io/line-share/shared/tool-share.js" data-tool="suqsuq" defer></script>
 </body>
 </html>
