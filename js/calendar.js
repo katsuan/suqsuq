@@ -63,7 +63,7 @@ const REMINDS = [
 
 // まとめたカレンダーのファイル（.ics）。iPhone は開くと「すべてを追加」、Android・パソコンはカレンダーに読みこむ
 function icsFor(list, s = state) {
-  const esc = (t) => String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const esc = (t) => String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n|\r/g, "\\n");
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
   const trigger = (REMINDS.find((r) => r.id === s.remind) || REMINDS[0]).trigger;
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//katsuan//suqsuq//JA", "CALSCALE:GREGORIAN", "X-WR-CALNAME:すくすく"];

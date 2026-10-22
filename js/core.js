@@ -19,13 +19,30 @@ const clock = (sec) => `${Math.floor(sec / 60)}:${pad2(sec % 60)}`;
 // "2026-10-22" ⇄ 日付（時差でずれないよう、UTC の 0 時で扱う）
 const parseDay = (s) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || "");
-  return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN;
+  if (!m) return NaN;
+  const t = Date.UTC(+m[1], +m[2] - 1, +m[3]);
+  return new Date(t).getUTCDate() === +m[3] && new Date(t).getUTCMonth() === +m[2] - 1 ? t : NaN; // 2027-13-99 のような日は読まない
 };
 const todayStr = () => {
   const d = new Date();
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 };
 const dotDay = (s) => (s ? s.replace(/-/g, ".") : "");
+
+// 表示の選び方（表示のチップ）。big が大きな数字、unit がそのとなり、small がさらに小さく
+const FORMATS = {
+  born: [
+    { id: "days", label: "100 Days" },
+    { id: "nichime", label: "100日目" },
+    { id: "months", label: "3か月 8日" },
+    { id: "age", label: "1さい 2か月" }
+  ],
+  womb: [
+    { id: "weeks", label: "24週 3日" },
+    { id: "wd", label: "24w3d" },
+    { id: "left", label: "あと◯日" }
+  ]
+};
 
 // ---- 覚えておくこと（state）。この端末の localStorage に残す ----
 const STORE_KEY = "suqsuq:state";
@@ -36,34 +53,56 @@ const loadStore = () => {
     return {};
   }
 };
+// 外から来た文字（リンク・端末に残した中身）：文字だけにし、改行などの見えない文字を外して、長さを決める
+const cleanText = (v, max) => (typeof v === "string" ? v.replace(/[\u0000-\u001f\u007f\u2028\u2029]/g, " ").slice(0, max) : "");
+const cleanDay = (v) => (typeof v === "string" && !isNaN(parseDay(v)) ? v : "");
+const LOOK_DEFAULT = { tpl: "fuwari", color: "#e9735a", x: null, y: null, size: 1, showName: true, showDate: true, showStats: true, stamps: ["sparkle"], motion: "float" };
+// 文字の形（look）を決まった形にそろえる（形のちがう値は、はじめの値に）
+function cleanLook(raw) {
+  const l = raw && typeof raw === "object" ? raw : {};
+  const pos = (v) => (typeof v === "number" && v >= 0 && v <= 1 ? v : null);
+  const x = pos(l.x), y = pos(l.y);
+  return {
+    tpl: typeof l.tpl === "string" && /^[a-z0-9_-]{1,24}$/i.test(l.tpl) ? l.tpl : LOOK_DEFAULT.tpl,
+    color: typeof l.color === "string" && /^#[0-9a-f]{6}$/i.test(l.color) ? l.color : LOOK_DEFAULT.color,
+    x: x != null && y != null ? x : null,
+    y: x != null && y != null ? y : null,
+    size: typeof l.size === "number" && l.size >= 0.5 && l.size <= 1.8 ? l.size : 1,
+    showName: l.showName !== false,
+    showDate: l.showDate !== false,
+    showStats: l.showStats !== false,
+    stamps: Array.isArray(l.stamps) ? l.stamps.filter((id) => typeof id === "string" && /^[a-z0-9_-]{1,24}$/i.test(id)).slice(0, 12) : [...LOOK_DEFAULT.stamps],
+    motion: typeof l.motion === "string" && /^[a-z0-9_-]{1,24}$/i.test(l.motion) ? l.motion : LOOK_DEFAULT.motion
+  };
+}
 const saved = loadStore();
 const state = {
   mode: saved.mode === "womb" ? "womb" : "born", // 生まれてから／おなかの中
-  name: saved.name || "",
-  birth: saved.birth || "",
-  due: saved.due || "",
+  name: cleanText(saved.name, 16),
+  birth: cleanDay(saved.birth),
+  due: cleanDay(saved.due),
   day: "", // 数える日（空ならきょう）。覚えない（次に開いたときは、きょう）
   dayOne: saved.dayOne !== false, // 生まれた日を1日目と数える
-  fmtBorn: saved.fmtBorn || "days",
-  fmtWomb: saved.fmtWomb || "weeks",
+  fmtBorn: FORMATS.born.some((f) => f.id === saved.fmtBorn) ? saved.fmtBorn : "days",
+  fmtWomb: FORMATS.womb.some((f) => f.id === saved.fmtWomb) ? saved.fmtWomb : "weeks",
   // 文字の形（テンプレート・色・位置・大きさ・いっしょに入れるもの・スタンプ・動き）。マイテンプレートにはこのまとまりを覚える
-  look: Object.assign(
-    { tpl: "fuwari", color: "#e9735a", x: null, y: null, size: 1, showName: true, showDate: true, showStats: true, stamps: ["sparkle"], motion: "float" },
-    saved.look || {}
-  ),
-  myLooks: Array.isArray(saved.myLooks) ? saved.myLooks : [],
-  aspect: saved.aspect || "9:16",
+  look: cleanLook(saved.look),
+  myLooks: (Array.isArray(saved.myLooks) ? saved.myLooks : [])
+    .filter((m) => m && typeof m === "object" && cleanText(m.name, 12))
+    .slice(0, 8)
+    .map((m) => ({ name: cleanText(m.name, 12), look: cleanLook(m.look) })),
+  aspect: ["9:16", "3:4", "1:1", "16:9"].includes(saved.aspect) ? saved.aspect : "9:16",
   kind: saved.kind === "video" ? "video" : "photo",
   facing: saved.facing === "user" ? "user" : "environment",
   sound: saved.sound !== false, // 動画に音も入れる
-  memo: saved.memo || "", // ひとこと（写真に入れる好きな文字）
-  bTime: saved.bTime || "", // うまれたときの記録：時刻・体重（g）・身長（cm）
-  bWeight: saved.bWeight || "",
-  bLength: saved.bLength || "",
+  memo: cleanText(saved.memo, 24), // ひとこと（写真に入れる好きな文字）
+  bTime: /^\d{1,2}:\d{2}$/.test(saved.bTime || "") ? saved.bTime : "", // うまれたときの記録：時刻・体重（g）・身長（cm）
+  bWeight: cleanText(saved.bWeight, 6),
+  bLength: cleanText(saved.bLength, 5),
   designTab: ["look", "text", "deco", "save"].includes(saved.designTab) ? saved.designTab : "look", // 文字の形のタブ
   timer: [0, 3, 10].includes(saved.timer) ? saved.timer : 0, // セルフタイマー（秒）
   saveRaw: saved.saveRaw === true, // 文字・スタンプ入りに加えて、加工なしの元の写真・動画も残す（はじめはオフ）
-  remind: saved.remind || "morning", // 節目のお知らせ（js/calendar.js の REMINDS）
+  remind: ["morning", "eve", "none"].includes(saved.remind) ? saved.remind : "morning", // 節目のお知らせ（js/calendar.js の REMINDS）
   calWeekly: saved.calWeekly === true // おなかの中：毎週の◯週もカレンダーに
 };
 // リンクで日付を受けとる（くろのすの「すくすくで写真に入れる」など）：?birth=2026-07-14 ／ ?due=2027-03-01 ／ &name=はると
@@ -81,8 +120,12 @@ const fromLink = (() => {
     state.due = q.get("due");
     got = "出産予定日";
   }
-  if (got && q.get("name")) state.name = q.get("name").slice(0, 16);
-  if (q.has("birth") || q.has("due") || q.has("name")) history.replaceState(null, "", location.pathname);
+  if (got && q.get("name")) state.name = cleanText(q.get("name"), 16).trim();
+  if (q.has("birth") || q.has("due") || q.has("name")) {
+    // 名前や誕生日が入ったリンクは、検索に出さない
+    document.head.append(Object.assign(document.createElement("meta"), { name: "robots", content: "noindex" }));
+    history.replaceState(null, "", location.pathname);
+  }
   return got;
 })();
 const save = () => {
@@ -111,21 +154,6 @@ function ymd(from, to) {
   }
   return { y, m, d };
 }
-
-// 表示の選び方（表示のチップ）。big が大きな数字、unit がそのとなり、small がさらに小さく
-const FORMATS = {
-  born: [
-    { id: "days", label: "100 Days" },
-    { id: "nichime", label: "100日目" },
-    { id: "months", label: "3か月 8日" },
-    { id: "age", label: "1さい 2か月" }
-  ],
-  womb: [
-    { id: "weeks", label: "24週 3日" },
-    { id: "wd", label: "24w3d" },
-    { id: "left", label: "あと◯日" }
-  ]
-};
 
 // いまの設定で、写真に入れる文字のまとまりを作る。null は日付がまだないとき
 // { memo: ひとこと, top: 上の小さな行, big: 大きな数字, unit: 数字のとなり, small: さらに小さく, num: 数えあげる数（動き用）,

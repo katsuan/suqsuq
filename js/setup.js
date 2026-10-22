@@ -222,6 +222,7 @@ function renderToday() {
   if (L) $("dateError").hidden = true;
   const box = $("today");
   if (!L) {
+    // qcheck-ok: W1 決まった文字だけ
     box.innerHTML = `<p class="ls-hint">${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れると、ここに数えた日が出ます。</p>`;
     $("cameraOpen").textContent = "📅 まず日付を入れる";
     return;
