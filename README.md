@@ -69,3 +69,11 @@
 - LINE で送る：かぞく（KAZOQ）の GAS ボットにはもう妊娠週のメッセージがある（01_12_PREGNANCY_WEEK_MESSAGE_MASTER）。そこに節目を足す
 - アプリ版：端末の中だけの通知（ローカル通知）でできる。サーバーいらず
 - Web Push：ホーム画面に追加したときだけ（iPhone は iOS 16.4 から）。送る係に Cloudflare Workers の定期実行などがいる
+
+## ロゴの候補（見くらべ中）
+
+`python3 tools/logo_variants.py` で design/logo-candidates/ に書き出す（ページのロゴは tools/icon.py の logo.svg のまま）。
+
+- logo-plate-light（候補）：SuQsuQ。左の SuQ（ふたばの Q）が重く、右の suQ（小文字・最後の Q はメジャー）が軽い天秤。SuQ ごとに皿（下線）
+- logo-square（候補）：SuQ²。SuQ の2乗で SuQSuQ
+- そのほか見くらべた案（2つともふたば・つり下げ天秤・上皿天秤・傾き3パターン）も同じ場所に
