@@ -121,3 +121,4 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .result-media img, .result-media video { display: block; max-width: 100%; max-height: 60vh; border-radius: 12px; background: #000; }
 .result-actions { display: grid; gap: 8px; }
 .result-actions a.ls-button { text-decoration: none; }
+.raw-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--ls-accent-soft); font-size: 13px; font-weight: 700; }

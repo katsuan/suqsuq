@@ -153,6 +153,11 @@
         <div class="ls-chips" id="motionChips"></div>
       </div>
       <div class="ls-field">
+        <span class="ls-label">保存</span>
+        <label class="check"><input id="saveRaw" type="checkbox"> 加工なし（文字・スタンプなし）の元の写真・動画も残す</label>
+        <p class="ls-hint">いつもは文字・スタンプ入りを保存します。オンにすると、できた画面に「加工なし」の保存ボタンも出ます（カメラで撮ったときだけ）。</p>
+      </div>
+      <div class="ls-field">
         <span class="ls-label">マイテンプレート <small>（いまの形を覚えておく）</small></span>
         <div class="ls-chips" id="myChips"></div>
       </div>
@@ -216,6 +221,11 @@
     <div class="result-actions">
       <button id="share" class="ls-button is-primary is-block" type="button">📤 保存・共有</button>
       <a id="download" class="ls-button is-block" download>⬇️ ダウンロード</a>
+      <!-- 加工なしの元の写真・動画（設定でオンのとき） -->
+      <div id="rawRow" class="raw-row" hidden>
+        <span>加工なしの元の<span id="rawKind">写真</span></span>
+        <button id="rawSave" class="ls-button small" type="button">📤 加工なしも保存</button>
+      </div>
       <button id="again" class="ls-button is-block" type="button">もう一度撮る</button>
     </div>
   </div>

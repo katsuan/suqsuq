@@ -11,6 +11,7 @@ let camStream = null; // カメラ
 let picked = null; // 選んだ写真（img）。あればカメラの代わりに使う
 let stageBox = null; // 文字の範囲（ドラッグ用）
 let recorder = null;
+let rawRecorder = null; // 加工なしの元の動画（設定でオンのとき）
 let recStart = 0;
 let micStream = null;
 let wakeLock = null;
@@ -136,10 +137,10 @@ function renderKind() {
 }
 
 // ---- 写真 ----
-function fileName(ext) {
+function fileName(ext, suffix = "") {
   const L = countLabel();
   const tag = L ? `${L.big}${L.unit}${L.small}`.replace(/\s/g, "") : "";
-  return `suqsuq${state.name ? "-" + state.name : ""}${tag ? "-" + tag : ""}-${(state.day || todayStr()).replace(/-/g, "")}.${ext}`;
+  return `suqsuq${state.name ? "-" + state.name : ""}${tag ? "-" + tag : ""}-${(state.day || todayStr()).replace(/-/g, "")}${suffix ? "-" + suffix : ""}.${ext}`;
 }
 function takePhoto() {
   const [w, h] = ASPECTS[state.aspect];
@@ -147,8 +148,21 @@ function takePhoto() {
   c.width = w;
   c.height = h;
   drawScene(c.getContext("2d"), w, h, { src: source(), mirror: mirrored(), t: 0, look: state.look, label: countLabel(), still: true });
+  const raw = rawPhotoCanvas(); // 文字を描く前の、同じ瞬間の映像
   flash();
-  c.toBlob((blob) => blob && showResult(blob, fileName("jpg")), "image/jpeg", 0.92);
+  const toBlob = (cv) => new Promise((ok) => (cv ? cv.toBlob(ok, "image/jpeg", 0.95) : ok(null)));
+  Promise.all([toBlob(c), toBlob(raw)]).then(([blob, rawBlob]) => {
+    if (blob) showResult(blob, fileName("jpg"), rawBlob && { blob: rawBlob, name: fileName("jpg", "raw") });
+  });
+}
+// 加工なしの元の写真：カメラの映像そのもの（元の大きさ・切らない・左右もそのまま）。カメラのときで、設定がオンのときだけ
+function rawPhotoCanvas() {
+  if (!state.saveRaw || picked || !camStream || !camVideo.videoWidth) return null;
+  const c = document.createElement("canvas");
+  c.width = camVideo.videoWidth;
+  c.height = camVideo.videoHeight;
+  c.getContext("2d").drawImage(camVideo, 0, 0);
+  return c;
 }
 function flash() {
   const st = $("stage");
@@ -176,26 +190,47 @@ async function startRecording() {
       toast("マイクを使えないので、音なしで録ります");
     }
   }
-  const mimeType = pickMimeType();
-  recorder = new MediaRecorder(stream, { ...(mimeType ? { mimeType } : {}), videoBitsPerSecond: 8_000_000 });
-  const parts = [];
-  recorder.addEventListener("dataavailable", (e) => e.data.size && parts.push(e.data));
-  recorder.addEventListener("stop", () => {
-    const type = recorder?.mimeType || parts[0]?.type || "video/webm";
-    recorder = null;
+  const main = makeRecorder(stream, 8_000_000);
+  recorder = main.rec;
+  // 加工なしの元の動画：カメラの映像（＋同じ音）を、もう1つの録画でそのまま録る（設定がオンで、カメラのとき）
+  let raw = null;
+  if (state.saveRaw && !picked && camStream) {
+    const rawStream = new MediaStream([...camStream.getVideoTracks(), ...stream.getAudioTracks()]);
+    try {
+      raw = makeRecorder(rawStream, 10_000_000);
+      rawRecorder = raw.rec;
+    } catch {
+      raw = null;
+    }
+  }
+  Promise.all([main.done, raw ? raw.done : null]).then(([blob, rawBlob]) => {
+    recorder = rawRecorder = null;
     renderRecording();
-    showResult(new Blob(parts, { type }), fileName(type.includes("mp4") ? "mp4" : "webm"));
+    const ext = (b) => (b.type.includes("mp4") ? "mp4" : "webm");
+    showResult(blob, fileName(ext(blob)), rawBlob && { blob: rawBlob, name: fileName(ext(rawBlob), "raw") });
   });
   restartMotion(); // 動き（カウントアップ・ぽよん）は録りはじめから
   recorder.start(1000);
+  rawRecorder?.start(1000);
   recStart = performance.now();
   renderRecording();
   try {
     wakeLock = await navigator.wakeLock?.request("screen");
   } catch {}
 }
+// 録画を1つ作る。done は止まったときの動画（Blob）
+function makeRecorder(stream, bits) {
+  const mimeType = pickMimeType();
+  const rec = new MediaRecorder(stream, { ...(mimeType ? { mimeType } : {}), videoBitsPerSecond: bits });
+  const parts = [];
+  rec.addEventListener("dataavailable", (e) => e.data.size && parts.push(e.data));
+  const done = new Promise((ok) => rec.addEventListener("stop", () => ok(new Blob(parts, { type: rec.mimeType || parts[0]?.type || "video/webm" }))));
+  return { rec, done };
+}
 function stopRecording() {
+  if (recorder?.state === "inactive") return;
   recorder?.stop();
+  if (rawRecorder?.state !== "inactive") rawRecorder?.stop();
   wakeLock?.release?.().catch(() => {});
   wakeLock = null;
 }
@@ -233,8 +268,12 @@ function cancelCountdown() {
 }
 
 // ---- できた写真・動画 ----
-function showResult(blob, name) {
+let lastRaw = null; // 加工なしの元の写真・動画 { blob, name }
+function showResult(blob, name, raw = null) {
   if (lastResult) URL.revokeObjectURL(lastResult.url);
+  lastRaw = raw;
+  $("rawRow").hidden = !raw;
+  $("rawKind").textContent = blob.type.startsWith("video") ? "動画" : "写真";
   const url = URL.createObjectURL(blob);
   lastResult = { blob, name, url };
   const media = $("resultMedia");
@@ -267,6 +306,26 @@ $("share").addEventListener("click", async () => {
   } catch (err) {
     if (err?.name !== "AbortError") toast("共有できませんでした。⬇️ で保存してください");
   }
+});
+// 加工なしも保存：共有できる端末は共有メニュー（写真へ保存など）、できなければダウンロード
+$("rawSave").addEventListener("click", async () => {
+  if (!lastRaw) return;
+  const file = new File([lastRaw.blob], lastRaw.name, { type: lastRaw.blob.type });
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      toast("✓ 加工なしも保存できました");
+    } catch (err) {
+      if (err?.name !== "AbortError") toast("共有できませんでした");
+    }
+    return;
+  }
+  const url = URL.createObjectURL(lastRaw.blob);
+  const a = Object.assign(document.createElement("a"), { href: url, download: lastRaw.name });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 });
 $("again").addEventListener("click", () => {
   $("result").hidden = true;

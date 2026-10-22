@@ -315,6 +315,12 @@ function bindSetup() {
   );
   $("name").value = state.name;
   $("memo").value = state.memo;
+  $("saveRaw").checked = state.saveRaw;
+  $("saveRaw").addEventListener("change", () => {
+    state.saveRaw = $("saveRaw").checked;
+    save();
+    toast(state.saveRaw ? "加工なしの元の写真・動画も残します" : "文字・スタンプ入りだけ残します");
+  });
   $("memo").addEventListener("input", () => {
     state.memo = $("memo").value;
     save();
