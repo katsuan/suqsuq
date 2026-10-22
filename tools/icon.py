@@ -90,47 +90,56 @@ def tape_reach():
 
 
 def build_tape():
-    """ロゴの1つ目の Q：メジャー（すくすく育つのを測る）。輪はケース、その下から引き出したテープ（目盛りつき）が
-    「Su」の下を、ゆるく波打ちながら通って、先がふわっと持ち上がり、2つ目の Q（ふたばの芽）の手前まで。
+    """ロゴの1つ目の Q：メジャー（すくすく育つのを測る）。輪はケース。テープはケースの中（輪の下がわ）から
+    輪にそって出てきて（参考：巻き尺のケースのすき間からテープが出る絵）、「Su」の下をゆるくたわみながら通り、
+    2つ目の Q（ふたばの芽）の手前まで。テープのまわりに背景の色のふちをつけて、輪に差しこまれているように見せる。
     テープは "free"（次の字の位置をずらさない）。輪の中心・太さはふたばの Q と同じ。ふたばの Q と同じだけずらす"""
     c = C0
-    tape_w = 7.5
-    base = c[1] + RING_OUTER + tape_w / 2 - 1.5  # テープの真ん中の高さ（ケースの下にふれる）
-    x0, x1 = c[0] - 2, c[0] + tape_reach() - 4
+    tape_w = 7
+    base = c[1] + RING_OUTER + tape_w / 2 - 1  # 輪を出たあとのテープの真ん中の高さ
+    x1 = c[0] + tape_reach() - 4
 
+    # 1) ケースの中：輪の線の上を、左下（140°）から真下の少し右（80°）へ（y が下向きなので、角度をへらすと右へ進む）
+    arc_pts = [polar(c, a, R + 1) for a in range(140, 79, -5)]
+    ax, ay = arc_pts[-1]
+
+    # 2) ケースの外：輪を出て、少し下がりながら「Su」の下へ。まんなかで少したるむ
     def at(t):
-        """テープの真ん中の線（t は 0〜1）。まんなかで少したるみ、先で持ち上がる"""
-        x = x0 + (x1 - x0) * t
-        y = base + 1.2 + 4.5 * math.sin(math.pi * t) - 1.5 * max(0, t - 0.8) ** 2 / 0.04
+        x = ax + (x1 - ax) * t
+        ease = min(1, t / 0.22)
+        ease = ease * ease * (3 - 2 * ease)  # はじめはなめらかに下りる
+        y = ay + (base + 1 - ay) * ease + 3.5 * math.sin(math.pi * t) - 1.5 * max(0, t - 0.8) ** 2 / 0.04
         return (x, y)
 
-    n = 40
-    path = [at(k / n) for k in range(n + 1)]
+    n = 44
+    out = [at(k / n) for k in range(n + 1)]
+    path = arc_pts + out[1:]
     tape = [
         {"t": "circle", "c": c, "r": R, "alpha": 0.16},  # 輪の内側（うっすら）
-        {"t": "line", "p": path, "w": tape_w, "free": True},  # テープ（丸い端）
         {"t": "ring", "c": c, "r": R, "w": RING_W},  # ケース（Q の輪）
         {"t": "circle", "c": c, "r": 6},  # まんなかの軸
         {"t": "circle", "c": c, "r": 2.2, "fill": "bg"},  # 軸のねじ
+        {"t": "line", "p": path, "w": tape_w + 2.6, "fill": "bg", "free": True},  # テープのふち（輪に差しこまれたすき間に見える）
+        {"t": "line", "p": path, "w": tape_w, "free": True},  # テープ
     ]
 
     def normal(t):
-        (ax, ay), (bx, by) = at(max(0, t - 0.01)), at(min(1, t + 0.01))
-        d = math.hypot(bx - ax, by - ay)
-        return (-(by - ay) / d, (bx - ax) / d)  # 下向きの法線
+        (px, py), (qx, qy) = at(max(0, t - 0.01)), at(min(1, t + 0.01))
+        d = math.hypot(qx - px, qy - py)
+        return (-(qy - py) / d, (qx - px) / d)  # 下向きの法線
 
     # 先の金具（つめ）：テープの向きに直角に、下へ
     nx, ny = normal(1)
-    ex, ey = path[-1]
-    tape.append({"t": "line", "p": [(ex - nx * 2, ey - ny * 2), (ex + nx * 7, ey + ny * 7)], "w": 3.2, "free": True})  # 本物のつめのように下へ
-    # 目盛り：テープの上のふちから、テープに直角に。長い・短いを交互に。ケースの右から
-    t, k = (RING_OUTER + 4) / (x1 - x0), 0
+    ex, ey = out[-1]
+    tape.append({"t": "line", "p": [(ex - nx * 2, ey - ny * 2), (ex + nx * 7, ey + ny * 7)], "w": 3.2, "free": True})
+    # 目盛り：輪の外に出てから。テープの上のふちから直角に、長い・短いを交互に
+    t, k = (c[0] + RING_OUTER + 3 - ax) / (x1 - ax), 0
     while t < 0.95:
         (px, py), (nx, ny) = at(t), normal(t)
-        top = (px - nx * (tape_w / 2 - 0.8), py - ny * (tape_w / 2 - 0.8))
-        ln = 3.6 if k % 2 == 0 else 2
+        top = (px - nx * (tape_w / 2 - 0.7), py - ny * (tape_w / 2 - 0.7))
+        ln = 3.4 if k % 2 == 0 else 1.9
         tape.append({"t": "line", "p": [top, (top[0] + nx * ln, top[1] + ny * ln)], "w": 1.3, "fill": "bg", "free": True})
-        t += 4 / (x1 - x0)
+        t += 4 / (x1 - ax)
         k += 1
     move = lambda pt: (pt[0] + _DX, pt[1] + _DY)  # noqa: E731
     return [{**sh, **({"c": move(sh["c"])} if "c" in sh else {}), **({"p": [move(q) for q in sh["p"]]} if "p" in sh else {})} for sh in tape]
