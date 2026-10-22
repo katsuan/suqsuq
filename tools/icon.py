@@ -6,7 +6,7 @@
 アイコンはおくるんと同じ角の丸い四角に、やわらかいピーチ色。Q の輪のてっぺんから、ふたばの芽（すくすく育つ）。
 
   icon.svg・icon-32.png・apple-touch-icon.png・icon-512.png・icon-maskable-512.png … アイコン
-  logo.svg … 横長のロゴ「SuQSuQ」（1つ目の Q はメジャー（目盛りのテープが「Su」の下を通って次の Q の手前まで）、最後の Q はアイコンと同じふたばの芽。S・u は Jua）
+  logo.svg … 横長のロゴ「SuQSuQ」（1つ目の Q はメジャー（目盛りのテープが「Su」の下をゆるく波打って通り、先が持ち上がって次の Q の手前まで）、最後の Q はアイコンと同じふたばの芽。S・u は Jua）
   ogp.png  … 共有したときの画像（1200×630）
 
 使い方: python3 tools/icon.py（となりのおくるん（q-oqrn）の tools/brandkit.py を使う）
@@ -91,27 +91,49 @@ def tape_reach():
 
 def build_tape():
     """ロゴの1つ目の Q：メジャー（すくすく育つのを測る）。輪はケース、その下から引き出したテープ（目盛りつき）が
-    「Su」の下を通って、2つ目の Q（ふたばの芽）の手前まで。テープは "free"（次の字の位置をずらさない）。
-    輪の中心・太さはふたばの Q と同じ（ロゴで同じ大きさに並ぶように）。ふたばの Q と同じだけずらす"""
+    「Su」の下を、ゆるく波打ちながら通って、先がふわっと持ち上がり、2つ目の Q（ふたばの芽）の手前まで。
+    テープは "free"（次の字の位置をずらさない）。輪の中心・太さはふたばの Q と同じ。ふたばの Q と同じだけずらす"""
     c = C0
-    top = c[1] + RING_OUTER - 1.5  # テープの上（ケースの下にふれる）
-    bottom = top + 8
-    x0, x1 = c[0] - 4, c[0] + tape_reach() - 3  # 2つ目の Q の少し手前まで
+    tape_w = 7.5
+    base = c[1] + RING_OUTER + tape_w / 2 - 1.5  # テープの真ん中の高さ（ケースの下にふれる）
+    x0, x1 = c[0] - 2, c[0] + tape_reach() - 4
+
+    def at(t):
+        """テープの真ん中の線（t は 0〜1）。まんなかで少したるみ、先で持ち上がる"""
+        x = x0 + (x1 - x0) * t
+        y = base + 1.2 + 4.5 * math.sin(math.pi * t) - 1.5 * max(0, t - 0.8) ** 2 / 0.04
+        return (x, y)
+
+    n = 40
+    path = [at(k / n) for k in range(n + 1)]
     tape = [
         {"t": "circle", "c": c, "r": R, "alpha": 0.16},  # 輪の内側（うっすら）
-        {"t": "rect", "box": (x0, top, x1, bottom), "rx": 1.5, "free": True},  # テープ
-        {"t": "rect", "box": (x1 - 1, top - 3, x1 + 2.5, bottom + 3), "rx": 1, "free": True},  # 先の金具
+        {"t": "line", "p": path, "w": tape_w, "free": True},  # テープ（丸い端）
         {"t": "ring", "c": c, "r": R, "w": RING_W},  # ケース（Q の輪）
         {"t": "circle", "c": c, "r": 6},  # まんなかの軸
         {"t": "circle", "c": c, "r": 2.2, "fill": "bg"},  # 軸のねじ
     ]
-    # 目盛り：テープの上のふちから、長い（10ごと）・短いを交互に。ケースの右から
-    x, i = c[0] + RING_OUTER + 3, 0
-    while x < x1 - 3:
-        tape.append({"t": "line", "p": [(x, top + 1.2), (x, top + (5 if i % 2 == 0 else 3))], "w": 1.4, "fill": "bg", "free": True})
-        x += 4
-        i += 1
-    return [{**sh, **({"c": (sh["c"][0] + _DX, sh["c"][1] + _DY)} if "c" in sh else {}), **({"p": [(px + _DX, py + _DY) for px, py in sh["p"]]} if "p" in sh else {}), **({"box": (sh["box"][0] + _DX, sh["box"][1] + _DY, sh["box"][2] + _DX, sh["box"][3] + _DY)} if "box" in sh else {})} for sh in tape]
+
+    def normal(t):
+        (ax, ay), (bx, by) = at(max(0, t - 0.01)), at(min(1, t + 0.01))
+        d = math.hypot(bx - ax, by - ay)
+        return (-(by - ay) / d, (bx - ax) / d)  # 下向きの法線
+
+    # 先の金具（つめ）：テープの向きに直角に、下へ
+    nx, ny = normal(1)
+    ex, ey = path[-1]
+    tape.append({"t": "line", "p": [(ex - nx * 2, ey - ny * 2), (ex + nx * 7, ey + ny * 7)], "w": 3.2, "free": True})  # 本物のつめのように下へ
+    # 目盛り：テープの上のふちから、テープに直角に。長い・短いを交互に。ケースの右から
+    t, k = (RING_OUTER + 4) / (x1 - x0), 0
+    while t < 0.95:
+        (px, py), (nx, ny) = at(t), normal(t)
+        top = (px - nx * (tape_w / 2 - 0.8), py - ny * (tape_w / 2 - 0.8))
+        ln = 3.6 if k % 2 == 0 else 2
+        tape.append({"t": "line", "p": [top, (top[0] + nx * ln, top[1] + ny * ln)], "w": 1.3, "fill": "bg", "free": True})
+        t += 4 / (x1 - x0)
+        k += 1
+    move = lambda pt: (pt[0] + _DX, pt[1] + _DY)  # noqa: E731
+    return [{**sh, **({"c": move(sh["c"])} if "c" in sh else {}), **({"p": [move(q) for q in sh["p"]]} if "p" in sh else {})} for sh in tape]
 
 
 TAPE = build_tape()
