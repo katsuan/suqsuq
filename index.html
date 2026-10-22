@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>すくすく｜生まれて◯日・妊娠◯週を写真と動画に</title>
+<meta name="description" content="すくすく（SuQSuQ）。生まれて◯日・生後◯か月・妊娠◯週を、写真や動画にそのまま入れて残せます。文字の形・位置・動くスタンプも選べます。">
+<!-- 確認がすむまで、検索に出さない -->
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="すくすく（SuQSuQ）">
+<meta property="og:title" content="すくすく｜生まれて◯日・妊娠◯週を写真と動画に">
+<meta property="og:description" content="生まれて◯日・妊娠◯週を、写真と動画にそのまま入れて残せます">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#fff7f3">
+<!-- アイコン・ロゴ・OGP は tools/icon.py で作る -->
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- 画面の字（丸ゴシック）と、写真に入れる字（テンプレートごと。js/draw.js の FONTS） -->
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Mochiy+Pop+One&family=Yomogi&family=Shippori+Mincho:wght@600&family=Cormorant+Garamond:ital,wght@1,600&family=Jua&display=swap" rel="stylesheet">
+<!-- Q キット（おくるんの共通部品）。色と字は style.css の :root で、すくすくのピーチに -->
+<link rel="stylesheet" href="https://katsuan.github.io/line-share/shared/ui.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="ls-has-sendbar">
+<!-- はじめの画面：だれの・いつからを入れて、文字の形を決める -->
+<main id="setup" class="setup">
+  <div class="ls-brand">
+    <h1 class="ls-brand-name"><img class="ls-brand-icon" src="icon.svg" alt="" width="28" height="28">すくすく</h1>
+    <img class="ls-brand-logo" src="logo.svg" alt="SuQSuQ" height="28">
+  </div>
+  <p class="ls-brand-copy">すくすく、まいにちが記念日</p>
+
+  <div class="ls-tabs" role="tablist" aria-label="数えかた">
+    <button class="ls-tab" type="button" role="tab" data-mode="born" aria-selected="true">👶 生まれてから</button>
+    <button class="ls-tab" type="button" role="tab" data-mode="womb" aria-selected="false">🤰 おなかの中</button>
+  </div>
+
+  <!-- だれの・いつから -->
+  <section class="ls-panel">
+    <div class="who">
+      <label class="ls-field">
+        <span class="ls-label">なまえ <small>（なくてもよい）</small></span>
+        <input id="name" class="ls-input" maxlength="16" placeholder="例：はると" autocomplete="off">
+      </label>
+      <label class="ls-field" data-mode-only="born">
+        <span class="ls-label">生まれた日</span>
+        <input id="birth" class="ls-input date" type="date">
+      </label>
+      <label class="ls-field" data-mode-only="womb" hidden>
+        <span class="ls-label">出産予定日</span>
+        <input id="due" class="ls-input date" type="date">
+      </label>
+    </div>
+    <!-- いまの数え（大きく）と、つぎの節目 -->
+    <div class="today" id="today" aria-live="polite"></div>
+    <details class="ls-fold">
+      <summary><span class="ls-fold-icon">📅</span><span class="fold-title">数える日</span><span class="ls-fold-meta" id="dayMeta">きょう</span></summary>
+      <div class="ls-fold-body fold-pad">
+        <p class="ls-hint">前に撮った写真に入れるときは、その写真の日にします。</p>
+        <div class="ls-row">
+          <input id="day" class="ls-input date" type="date">
+          <button id="dayToday" class="ls-button" type="button">きょう</button>
+        </div>
+        <label class="check" data-mode-only="born"><input id="dayOne" type="checkbox"> 生まれた日を「1日目」と数える（オフなら 0日）</label>
+      </div>
+    </details>
+  </section>
+
+  <!-- 文字の形（テンプレート・位置・大きさ・スタンプ・動き）。カメラの画面では、下から出るシートに移す -->
+  <section class="ls-panel">
+    <div class="ls-panel-head">
+      <h2 class="ls-panel-title">🎨 写真に入れる文字</h2>
+      <p class="ls-panel-note">文字は、見本の上で指で動かせます。</p>
+    </div>
+    <div class="preview-wrap">
+      <canvas id="preview" class="stage" aria-label="見本"></canvas>
+    </div>
+    <div id="design" class="design">
+      <div class="ls-field">
+        <span class="ls-label">表示</span>
+        <div class="ls-chips" id="fmtChips"></div>
+      </div>
+      <div class="ls-field">
+        <span class="ls-label">テンプレート</span>
+        <div class="tpl-row" id="tplChips"></div>
+      </div>
+      <div class="ls-field">
+        <span class="ls-label">色</span>
+        <div class="ls-swatches" id="colorChips"></div>
+      </div>
+      <div class="ls-field">
+        <span class="ls-label">大きさ</span>
+        <div class="size-row">
+          <span>小</span><input id="size" type="range" min="0.5" max="1.8" step="0.05"><span>大</span>
+          <button id="center" class="ls-button small" type="button" title="位置をもとにもどす">⊕ もとの位置</button>
+        </div>
+      </div>
+      <div class="ls-field">
+        <span class="ls-label">いっしょに入れる</span>
+        <div class="ls-chips" id="extraChips"></div>
+      </div>
+      <div class="ls-field">
+        <span class="ls-label">動くスタンプ <small>（いくつでも。写真では止まった形）</small></span>
+        <div class="ls-chips" id="stampChips"></div>
+      </div>
+      <div class="ls-field">
+        <span class="ls-label">文字の動き <small>（動画のとき）</small></span>
+        <div class="ls-chips" id="motionChips"></div>
+      </div>
+      <div class="ls-field">
+        <span class="ls-label">マイテンプレート <small>（いまの形を覚えておく）</small></span>
+        <div class="ls-chips" id="myChips"></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="small-note">写真・動画はこの端末の中だけで作ります（サーバーには送りません）。</p>
+</main>
+
+<!-- 下に固定：カメラを開く・写真を選ぶ -->
+<div class="ls-sendbar" id="setupBar">
+  <div class="ls-sendbar-inner">
+    <div class="ls-sendbar-row">
+      <button id="pickOpen" class="ls-button ls-send-secondary" type="button">🖼 写真を選ぶ</button>
+      <button id="cameraOpen" class="ls-button is-primary" type="button">📷 カメラを開く</button>
+    </div>
+  </div>
+</div>
+<input id="pickFile" type="file" accept="image/*" hidden>
+
+<!-- 撮る画面：映像と文字を1つのキャンバスに描き、写真はそのまま画像に、動画はキャンバスを録る -->
+<section id="shoot" class="shoot" hidden>
+  <div class="shoot-top">
+    <button id="shootHome" class="round" type="button" aria-label="はじめの画面へ">🏠</button>
+    <div class="seg" role="tablist" aria-label="写真か動画か">
+      <button type="button" data-kind="photo" aria-pressed="true">写真</button>
+      <button type="button" data-kind="video" aria-pressed="false">動画</button>
+    </div>
+    <button id="sound" class="round" type="button" hidden>🎙</button>
+    <button id="aspect" class="round wide" type="button" aria-label="画面の形">9:16</button>
+    <button id="designOpen" class="round" type="button" aria-label="文字の形を変える">🎨</button>
+  </div>
+  <div class="shoot-stage">
+    <canvas id="stage" class="stage"></canvas>
+    <p id="recTime" class="rec-time" hidden>0:00</p>
+    <p id="shootMsg" class="shoot-msg" hidden></p>
+    <p id="dragHint" class="drag-hint" hidden>文字は指で動かせます</p>
+  </div>
+  <div class="shoot-bottom">
+    <button id="shootPick" class="round" type="button" aria-label="写真を選ぶ">🖼</button>
+    <button id="shutter" class="shutter" type="button" aria-label="撮る"><span></span></button>
+    <button id="flip" class="round" type="button" aria-label="カメラを切りかえる">🔄</button>
+  </div>
+  <!-- 文字の形のシート（はじめの画面の #design をここに移す） -->
+  <div id="designSheet" class="design-sheet" hidden>
+    <div class="sheet-head"><b>🎨 文字の形</b><button id="designClose" class="ls-button small" type="button">とじる</button></div>
+    <div id="designSlot" class="sheet-body"></div>
+  </div>
+</section>
+
+<!-- できた写真・動画 -->
+<div id="result" class="result" hidden>
+  <div class="result-card">
+    <div class="result-media" id="resultMedia"></div>
+    <div class="result-actions">
+      <button id="share" class="ls-button is-primary is-block" type="button">📤 保存・共有</button>
+      <a id="download" class="ls-button is-block" download>⬇️ ダウンロード</a>
+      <button id="again" class="ls-button is-block" type="button">もう一度撮る</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="ls-toast" hidden></div>
+
+<!-- 動き（役ごとのファイル。この順に読む。いちばん先の core.js の頭に、ファイルの一覧） -->
+<script src="js/core.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/setup.js"></script>
+<script src="js/shoot.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
