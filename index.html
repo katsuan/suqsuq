@@ -71,6 +71,21 @@
         <label class="check" data-mode-only="born"><input id="dayOne" type="checkbox"> 生まれた日を「1日目」と数える（オフなら 0日）</label>
       </div>
     </details>
+    <!-- 節目をカレンダーに（お知らせはカレンダーのお知らせで。js/calendar.js） -->
+    <details class="ls-fold">
+      <summary><span class="ls-fold-icon">🔔</span><span class="fold-title">節目をカレンダーに</span><span class="ls-fold-meta" id="calMeta"></span></summary>
+      <div class="ls-fold-body fold-pad">
+        <p class="ls-hint">これからの節目を、カレンダーの予定に入れます。その日にカレンダーがお知らせしてくれます。</p>
+        <label class="check" id="calWeeklyRow" hidden><input id="calWeekly" type="checkbox"> 毎週（◯週になった日）も入れる</label>
+        <div id="calList" class="cal-list"></div>
+        <div class="ls-field">
+          <span class="ls-label">お知らせ <small>（まとめて入れるとき）</small></span>
+          <div class="ls-chips" id="calRemind"></div>
+        </div>
+        <button id="calIcs" class="ls-button is-primary is-block" type="button">📥 まとめてカレンダーに入れる</button>
+        <p class="ls-hint">iPhone はファイルを開くと「すべてを追加」で入ります。1件ずつ入れるときは「Google」（お知らせは Google カレンダーの決まりのもの）。</p>
+      </div>
+    </details>
   </section>
 
   <!-- 文字の形（テンプレート・位置・大きさ・スタンプ・動き）。カメラの画面では、下から出るシートに移す -->
@@ -183,6 +198,7 @@
 <script src="js/core.js"></script>
 <script src="js/draw.js"></script>
 <script src="js/setup.js"></script>
+<script src="js/calendar.js"></script>
 <script src="js/shoot.js"></script>
 <script src="js/main.js"></script>
 </body>

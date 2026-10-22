@@ -3,6 +3,7 @@
 
 bindSetup();
 bindShoot();
+bindCalendar();
 sizeStage();
 renderAll();
 fontsReady.then(renderAll);

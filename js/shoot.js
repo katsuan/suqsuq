@@ -19,12 +19,25 @@ let lastResult = null; // { blob, name, url }
 const source = () => picked || (camStream ? camVideo : null);
 const mirrored = () => !picked && state.facing === "user";
 
+// 映像を、上下のボタンのあいだの欄に収める（縦横の比はそのまま）
+function fitStage() {
+  const box = document.querySelector(".shoot-stage").getBoundingClientRect();
+  const c = $("stage");
+  if (!box.width || !box.height) return;
+  const s = Math.min((box.width - 16) / c.width, box.height / c.height);
+  c.style.width = `${Math.floor(c.width * s)}px`;
+  c.style.height = `${Math.floor(c.height * s)}px`;
+}
+window.addEventListener("resize", fitStage);
+window.visualViewport?.addEventListener("resize", fitStage);
+
 function sizeStage() {
   const [w, h] = ASPECTS[state.aspect];
   $("stage").width = w;
   $("stage").height = h;
   $("aspect").textContent = state.aspect;
   sizePreview();
+  fitStage();
 }
 
 async function startCamera() {
@@ -62,6 +75,7 @@ function openShoot() {
   $("shoot").hidden = false;
   document.body.classList.add("is-shooting");
   sizeStage();
+  requestAnimationFrame(fitStage); // 画面を出してから、欄の大きさを測る
   renderKind();
   restartMotion();
   if (!picked) startCamera();

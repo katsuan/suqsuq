@@ -44,6 +44,16 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .today-main b { font-size: 34px; color: var(--accent); margin: 0 2px; font-variant-numeric: tabular-nums; }
 .today .ls-hint { margin: 0; }
 
+/* 節目をカレンダーに */
+.cal-list { display: grid; gap: 6px; max-height: 320px; overflow-y: auto; }
+.cal-row { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--ls-surface-sub, #faf7f5); }
+.cal-text { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.cal-text input { flex: none; width: 20px; height: 20px; accent-color: var(--accent); }
+.cal-text span { display: grid; min-width: 0; }
+.cal-text b { font-size: 14px; }
+.cal-text small { font-size: 12px; color: var(--ink-soft); }
+.cal-g { flex: none; padding: 6px 10px; border: 1px solid var(--ls-line-strong, #ccc); border-radius: 999px; color: var(--ink); font-size: 12px; font-weight: 800; text-decoration: none; background: #fff; }
+
 /* 見本（動画と同じ形。縦長でも画面からはみ出さないよう、高さを決めて幅は形に合わせる） */
 .preview-wrap { display: grid; place-items: center; padding: 10px; border-radius: 16px; background: #f6ebe6; }
 .stage { display: block; max-width: 100%; max-height: 58vh; border-radius: 12px; touch-action: none; box-shadow: 0 6px 18px rgba(80, 40, 30, 0.12); }
@@ -58,7 +68,8 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .small-note { margin: 0; text-align: center; font-size: 12px; color: var(--ink-soft); }
 
 /* ---- 撮る画面 ---- */
-.shoot { position: fixed; inset: 0; z-index: 50; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: #111; color: #fff; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+/* 高さは見えている分（100dvh）。100vh や inset:0 だと、スマホのブラウザでは下のバーの裏に入って、シャッターが切れることがある */
+.shoot { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100dvh; z-index: 50; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; background: #111; color: #fff; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
 .shoot-top { display: flex; align-items: center; gap: 8px; padding: 10px 12px; }
 .shoot-top .seg { margin: 0 auto; }
 .seg { display: inline-flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); }
@@ -67,14 +78,16 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .round { flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.16); color: #fff; font: inherit; font-size: 20px; cursor: pointer; }
 .round.wide { width: auto; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 800; }
 .shoot-stage { position: relative; display: grid; place-items: center; min-height: 0; padding: 0 8px; }
-.shoot-stage .stage { max-height: 100%; box-shadow: none; border-radius: 10px; }
+/* 映像は、上下のボタンのあいだに収まる大きさ（js/shoot.js の fitStage で幅・高さを決める。キャンバスの元の大きさで押し広げない） */
+.shoot-stage { overflow: hidden; }
+.shoot-stage .stage { position: absolute; max-width: none; max-height: none; box-shadow: none; border-radius: 10px; }
 .stage.is-flash { animation: flash 0.35s ease-out; }
 @keyframes flash { from { filter: brightness(2.2); } to { filter: none; } }
 .rec-time { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); margin: 0; padding: 4px 12px; border-radius: 999px; background: #e53935; font-weight: 800; font-variant-numeric: tabular-nums; }
 .shoot-msg, .drag-hint { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; padding: 10px 16px; border-radius: 14px; background: rgba(0, 0, 0, 0.7); font-size: 14px; line-height: 1.6; text-align: center; width: max-content; max-width: calc(100% - 40px); pointer-events: none; }
 .shoot-msg { top: 40%; }
 .drag-hint { bottom: 16px; }
-.shoot-bottom { display: flex; align-items: center; justify-content: space-around; padding: 14px 16px 18px; }
+.shoot-bottom { display: flex; align-items: center; justify-content: space-around; padding: 10px 16px max(14px, env(safe-area-inset-bottom, 0px)); }
 .shutter { width: 76px; height: 76px; padding: 0; border: 5px solid #fff; border-radius: 50%; background: transparent; display: grid; place-items: center; cursor: pointer; }
 .shutter span { width: 58px; height: 58px; border-radius: 50%; background: #fff; transition: all 0.2s; }
 .shutter.is-video span { background: #e53935; }

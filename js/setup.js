@@ -158,6 +158,7 @@ function renderAll() {
   renderFormats();
   renderDesign();
   renderToday();
+  renderCalendar();
   $("dayMeta").textContent = state.day ? dotDay(state.day) : "きょう";
   $("day").value = state.day || todayStr();
 }
@@ -243,12 +244,14 @@ function bindSetup() {
     state.name = $("name").value.trim();
     save();
     renderToday();
+    renderCalendar();
   });
   for (const id of ["birth", "due"]) {
     $(id).addEventListener("change", () => {
       state[id] = $(id).value;
       save();
       renderToday();
+      renderCalendar();
     });
   }
   $("day").addEventListener("change", () => {
@@ -263,6 +266,7 @@ function bindSetup() {
     state.dayOne = $("dayOne").checked;
     save();
     renderToday();
+    renderCalendar();
   });
   $("size").addEventListener("input", () => {
     state.look.size = Number($("size").value);

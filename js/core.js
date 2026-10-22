@@ -7,6 +7,7 @@
 //   core.js   共通の道具・覚えておくこと（state）・日数の計算  ← このファイル
 //   draw.js   描く（テンプレート・動くスタンプ・文字の動き）
 //   setup.js  はじめの画面（なまえ・日付・文字の形・見本）
+//   calendar.js 節目をカレンダーに（.ics・Google カレンダー）
 //   shoot.js  撮る画面（カメラ・写真・動画・できたもの）
 //   main.js   はじめに一度だけ動かすこと
 "use strict";
@@ -54,7 +55,9 @@ const state = {
   aspect: saved.aspect || "9:16",
   kind: saved.kind === "video" ? "video" : "photo",
   facing: saved.facing === "user" ? "user" : "environment",
-  sound: saved.sound !== false // 動画に音も入れる
+  sound: saved.sound !== false, // 動画に音も入れる
+  remind: saved.remind || "morning", // 節目のお知らせ（js/calendar.js の REMINDS）
+  calWeekly: saved.calWeekly === true // おなかの中：毎週の◯週もカレンダーに
 };
 const save = () => {
   try {
@@ -133,33 +136,18 @@ function countLabel(s = state) {
   return { top: "生まれて", big: String(n), unit: n === 1 ? "Day" : "Days", small: "", num: n, foot };
 }
 
-// つぎの節目（はじめの画面の「いまの数え」の下に出す）
-const MILESTONES = [
-  [30, "1か月ごろ"],
-  [50, "50日"],
-  [100, "100日（お食い初め）"],
-  [200, "200日"],
-  [300, "300日"],
-  [365, "1さい"],
-  [500, "500日"],
-  [730, "2さい"],
-  [1000, "1000日"]
-];
+// つぎの節目（はじめの画面の「いまの数え」の下に出す。一覧は js/calendar.js の milestoneList）
 function nextMilestone(s = state) {
-  const day = parseDay(s.day || todayStr());
   if (s.mode === "womb") {
     const due = parseDay(s.due);
     if (isNaN(due)) return "";
-    const g = 280 - Math.round((due - day) / DAY);
+    const g = 280 - Math.round((due - parseDay(s.day || todayStr())) / DAY);
     if (g < 0 || g >= 280) return "";
     const nextW = Math.floor(g / 7) + 1;
     return `${nextW}週まで あと${nextW * 7 - g}日 ・ 予定日まで あと${280 - g}日`;
   }
-  const birth = parseDay(s.birth);
-  if (isNaN(birth)) return "";
-  const n = Math.round((day - birth) / DAY) + (s.dayOne ? 1 : 0);
-  const next = MILESTONES.find(([d]) => d > n);
-  return next ? `つぎの節目：${next[1]}まで あと${next[0] - n}日` : "";
+  const next = milestoneList(s).find((m) => m.days > 0);
+  return next ? `つぎの節目：${next.label}${next.note ? `（${next.note}）` : ""}まで あと${next.days}日` : "";
 }
 
 // 小さな知らせ（下に少し出して消える）
