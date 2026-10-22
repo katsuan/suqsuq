@@ -16,6 +16,53 @@ const chip = (label, pressed, onClick, extra = "") => {
 function lookChanged() {
   save();
   renderDesign();
+  renderExamples();
+}
+
+// ひとことの例（押すと入る）
+const MEMO_EXAMPLES = {
+  born: ["はじめまして", "ようこそ わが家へ", "お食い初め", "ハーフバースデー", "はじめての寝がえり", "はじめてのおすわり", "はじめての一歩", "1さい おめでとう", "すやすや"],
+  womb: ["おなかの中から こんにちは", "もうすぐ会えるね", "安定期に入りました", "はじめての胎動", "マタニティフォト", "あと少し！"]
+};
+// おすすめの組み合わせ（スタンプ・文字の見本）。押すと形・色・スタンプ・動き・ひとことをまとめて入れる
+const RECIPES = {
+  born: [
+    { label: "👋 はじめまして", tpl: "frame", color: "#e9735a", stamps: ["sparkle"], motion: "none", memo: "はじめまして" },
+    { label: "🍚 お食い初め", tpl: "fuwari", color: "#e9735a", stamps: ["petal", "sparkle"], motion: "float", memo: "お食い初め" },
+    { label: "🎈 ハーフバースデー", tpl: "badge", color: "#5aa9e6", stamps: ["balloon", "confetti"], motion: "count", memo: "ハーフバースデー" },
+    { label: "🎂 1さいの誕生日", tpl: "pop", color: "#f4b740", stamps: ["confetti", "balloon"], motion: "pop", memo: "1さい おめでとう" },
+    { label: "🌙 ねんね", tpl: "elegant", color: "#9b7fe0", stamps: ["star", "sparkle"], motion: "float", memo: "すやすや" },
+    { label: "👣 はじめての", tpl: "hand", color: "#5cb85c", stamps: ["sparkle", "heart"], motion: "wave", memo: "はじめての寝がえり" }
+  ],
+  womb: [
+    { label: "💗 マタニティ", tpl: "elegant", color: "#ff8fab", stamps: ["heart", "bubble"], motion: "float", memo: "もうすぐ会えるね" },
+    { label: "🫧 おなかの中", tpl: "fuwari", color: "#5aa9e6", stamps: ["bubble", "sparkle"], motion: "float", memo: "おなかの中から こんにちは" },
+    { label: "🌸 安定期", tpl: "hand", color: "#ff8fab", stamps: ["petal"], motion: "float", memo: "安定期に入りました" },
+    { label: "⏳ あと少し", tpl: "badge", color: "#e9735a", stamps: ["sparkle", "star"], motion: "count", memo: "あと少し！" }
+  ]
+};
+function setMemo(text) {
+  state.memo = text;
+  $("memo").value = text;
+  save();
+  renderExamples();
+}
+function renderExamples() {
+  const memo = $("memoChips");
+  memo.replaceChildren();
+  for (const t of MEMO_EXAMPLES[state.mode]) memo.append(chip(t, state.memo === t, () => setMemo(state.memo === t ? "" : t)));
+  if (state.memo && !MEMO_EXAMPLES[state.mode].includes(state.memo)) memo.append(chip("✕ けす", false, () => setMemo("")));
+  const rec = $("recipeChips");
+  rec.replaceChildren();
+  for (const r of RECIPES[state.mode]) {
+    rec.append(chip(r.label, false, () => {
+      Object.assign(state.look, { tpl: r.tpl, color: r.color, stamps: [...r.stamps], motion: r.motion, x: null, y: null, size: 1 });
+      setMemo(r.memo);
+      restartMotion();
+      lookChanged();
+      toast(`「${r.label.replace(/^\S+ /, "")}」の組み合わせにしました`);
+    }));
+  }
 }
 
 function renderFormats() {
@@ -186,6 +233,7 @@ function renderAll() {
   renderMode();
   renderFormats();
   renderDesign();
+  renderExamples();
   renderToday();
   renderCalendar();
   $("dayMeta").textContent = state.day ? dotDay(state.day) : "きょう";
@@ -270,6 +318,7 @@ function bindSetup() {
   $("memo").addEventListener("input", () => {
     state.memo = $("memo").value;
     save();
+    renderExamples();
   });
   for (const id of ["bTime", "bWeight", "bLength"]) {
     $(id).value = state[id];

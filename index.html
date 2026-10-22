@@ -62,12 +62,13 @@
     <details class="ls-fold" data-mode-only="born">
       <summary><span class="ls-fold-icon">👶</span><span class="fold-title">うまれたときの記録</span><span class="ls-fold-meta" id="statsMeta"></span></summary>
       <div class="ls-fold-body fold-pad">
-        <p class="ls-hint">入れると、写真の数字の下に「3,120g ・ 49.5cm ・ 4:32 生まれ」のように入ります（「いっしょに入れる」で消せます）。</p>
+        <p class="ls-hint">入れると、写真の数字の下に「3,120g ・ 49.5cm ・ 4:32 生まれ」のように入ります（「いっしょに入れる」で消せます）。入れたものだけ出ます。</p>
         <div class="stats">
           <label class="ls-field"><span class="ls-label">時刻</span><input id="bTime" class="ls-input date" type="time"></label>
-          <label class="ls-field"><span class="ls-label">体重（g）</span><input id="bWeight" class="ls-input" inputmode="numeric" maxlength="5" placeholder="3120"></label>
-          <label class="ls-field"><span class="ls-label">身長（cm）</span><input id="bLength" class="ls-input" inputmode="decimal" maxlength="5" placeholder="49.5"></label>
+          <label class="ls-field"><span class="ls-label">体重（g）</span><input id="bWeight" class="ls-input" inputmode="decimal" maxlength="6" placeholder="例 3120"></label>
+          <label class="ls-field"><span class="ls-label">身長（cm）</span><input id="bLength" class="ls-input" inputmode="decimal" maxlength="5" placeholder="例 49.5"></label>
         </div>
+        <p class="ls-hint">例：午前4時32分 → 4:32 ／ 体重 3120（3.12 と kg で入れても 3,120g に）／ 身長 49.5。母子手帳の「出生時の記録」が目安です。</p>
       </div>
     </details>
     <!-- いまの数え（大きく）と、つぎの節目 -->
@@ -114,6 +115,12 @@
         <span class="ls-label">ひとこと <small>（好きな文字。数字の上に入る）</small></span>
         <input id="memo" class="ls-input" maxlength="24" placeholder="例：はじめての寝がえり" autocomplete="off">
       </label>
+      <!-- ひとことの例（押すと入る。数えかたで変わる） -->
+      <div class="ls-chips example-chips" id="memoChips" aria-label="ひとことの例"></div>
+      <div class="ls-field">
+        <span class="ls-label">おすすめの組み合わせ <small>（押すと、形・色・スタンプ・動き・ひとことをまとめて。そこから変えられる）</small></span>
+        <div class="ls-chips" id="recipeChips"></div>
+      </div>
       <div class="ls-field">
         <span class="ls-label">表示</span>
         <div class="ls-chips" id="fmtChips"></div>

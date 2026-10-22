@@ -116,7 +116,8 @@ function countLabel(s = state) {
 // うまれたときの記録（3,120g ・ 49.5cm ・ 4:32 生まれ）。生まれてからのときだけ
 function statsText(s = state) {
   if (s.mode !== "born" || !s.look.showStats) return "";
-  const w = Number(String(s.bWeight).replace(/[^\d.]/g, ""));
+  let w = Number(String(s.bWeight).replace(/[^\d.]/g, ""));
+  if (w && w < 20) w *= 1000; // 3.12 のように kg で入れたとき
   const l = Number(String(s.bLength).replace(/[^\d.]/g, ""));
   return [w ? `${Math.round(w).toLocaleString("ja-JP")}g` : "", l ? `${l}cm` : "", s.bTime ? `${s.bTime.replace(/^0(?=\d)/, "")} 生まれ` : ""].filter(Boolean).join(" ・ ");
 }
