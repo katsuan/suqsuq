@@ -60,6 +60,7 @@ const state = {
   bTime: saved.bTime || "", // うまれたときの記録：時刻・体重（g）・身長（cm）
   bWeight: saved.bWeight || "",
   bLength: saved.bLength || "",
+  designTab: ["look", "text", "deco", "save"].includes(saved.designTab) ? saved.designTab : "look", // 文字の形のタブ
   timer: [0, 3, 10].includes(saved.timer) ? saved.timer : 0, // セルフタイマー（秒）
   saveRaw: saved.saveRaw === true, // 文字・スタンプ入りに加えて、加工なしの元の写真・動画も残す（はじめはオフ）
   remind: saved.remind || "morning", // 節目のお知らせ（js/calendar.js の REMINDS）

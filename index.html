@@ -58,19 +58,6 @@
         <input id="due" class="ls-input date" type="date">
       </label>
     </div>
-    <!-- うまれたときの記録（バースフォトの定番：時刻・体重・身長）。入れたものだけ写真に -->
-    <details class="ls-fold" data-mode-only="born">
-      <summary><span class="ls-fold-icon">👶</span><span class="fold-title">うまれたときの記録</span><span class="ls-fold-meta" id="statsMeta"></span></summary>
-      <div class="ls-fold-body fold-pad">
-        <p class="ls-hint">入れると、写真の数字の下に「3,120g ・ 49.5cm ・ 4:32 生まれ」のように入ります（「いっしょに入れる」で消せます）。入れたものだけ出ます。</p>
-        <div class="stats">
-          <label class="ls-field"><span class="ls-label">時刻</span><input id="bTime" class="ls-input date" type="time"></label>
-          <label class="ls-field"><span class="ls-label">体重（g）</span><input id="bWeight" class="ls-input" inputmode="decimal" maxlength="6" placeholder="例 3120"></label>
-          <label class="ls-field"><span class="ls-label">身長（cm）</span><input id="bLength" class="ls-input" inputmode="decimal" maxlength="5" placeholder="例 49.5"></label>
-        </div>
-        <p class="ls-hint">例：午前4時32分 → 4:32 ／ 体重 3120（3.12 と kg で入れても 3,120g に）／ 身長 49.5。母子手帳の「出生時の記録」が目安です。</p>
-      </div>
-    </details>
     <!-- いまの数え（大きく）と、つぎの節目 -->
     <div class="today" id="today" aria-live="polite"></div>
     <details class="ls-fold">
@@ -99,67 +86,100 @@
         <p class="ls-hint">iPhone はファイルを開くと「すべてを追加」で入ります。1件ずつ入れるときは「Google」（お知らせは Google カレンダーの決まりのもの）。</p>
       </div>
     </details>
+    <!-- うまれたときの記録（バースフォトの定番：時刻・体重・身長）。入れたものだけ写真に -->
+    <details class="ls-fold" data-mode-only="born">
+      <summary><span class="ls-fold-icon">👶</span><span class="fold-title">うまれたときの記録</span><span class="ls-fold-meta" id="statsMeta"></span></summary>
+      <div class="ls-fold-body fold-pad">
+        <p class="ls-hint">入れると、写真の数字の下に「3,120g ・ 49.5cm ・ 4:32 生まれ」のように入ります（「いっしょに入れる」で消せます）。入れたものだけ出ます。</p>
+        <div class="stats">
+          <label class="ls-field"><span class="ls-label">時刻</span><input id="bTime" class="ls-input date" type="time"></label>
+          <label class="ls-field"><span class="ls-label">体重（g）</span><input id="bWeight" class="ls-input" inputmode="decimal" maxlength="6" placeholder="例 3120"></label>
+          <label class="ls-field"><span class="ls-label">身長（cm）</span><input id="bLength" class="ls-input" inputmode="decimal" maxlength="5" placeholder="例 49.5"></label>
+        </div>
+        <p class="ls-hint">例：午前4時32分 → 4:32 ／ 体重 3120（3.12 と kg で入れても 3,120g に）／ 身長 49.5。母子手帳の「出生時の記録」が目安です。</p>
+      </div>
+    </details>
   </section>
 
   <!-- 文字の形（テンプレート・位置・大きさ・スタンプ・動き）。カメラの画面では、下から出るシートに移す -->
   <section class="ls-panel">
     <div class="ls-panel-head">
       <h2 class="ls-panel-title">🎨 写真に入れる文字</h2>
-      <p class="ls-panel-note">文字は、見本の上で指で動かせます。</p>
+      <p class="ls-panel-note">見本の上で、文字を指で動かせます（2本指で大きさ）。</p>
     </div>
     <div class="preview-wrap">
       <canvas id="preview" class="stage" aria-label="見本"></canvas>
     </div>
+    <!-- 文字の形。4つのタブ（形・文字・かざり・保存）に分ける。撮る画面では、下から出るシートに移す -->
     <div id="design" class="design">
-      <label class="ls-field">
-        <span class="ls-label">ひとこと <small>（好きな文字。数字の上に入る）</small></span>
-        <input id="memo" class="ls-input" maxlength="24" placeholder="例：はじめての寝がえり" autocomplete="off">
-      </label>
-      <!-- ひとことの例（押すと入る。数えかたで変わる） -->
-      <div class="ls-chips example-chips" id="memoChips" aria-label="ひとことの例"></div>
-      <div class="ls-field">
-        <span class="ls-label">おすすめの組み合わせ <small>（押すと、形・色・スタンプ・動き・ひとことをまとめて。そこから変えられる）</small></span>
-        <div class="ls-chips" id="recipeChips"></div>
+      <div class="design-tabs" role="tablist" aria-label="文字の形">
+        <button type="button" role="tab" data-dtab="look" aria-selected="true">🎨 形</button>
+        <button type="button" role="tab" data-dtab="text" aria-selected="false">✏️ 文字</button>
+        <button type="button" role="tab" data-dtab="deco" aria-selected="false">✨ かざり</button>
+        <button type="button" role="tab" data-dtab="save" aria-selected="false">💾 保存</button>
       </div>
-      <div class="ls-field">
-        <span class="ls-label">表示</span>
-        <div class="ls-chips" id="fmtChips"></div>
-      </div>
-      <div class="ls-field">
-        <span class="ls-label">テンプレート</span>
-        <div class="tpl-row" id="tplChips"></div>
-      </div>
-      <div class="ls-field">
-        <span class="ls-label">色</span>
-        <div class="ls-swatches" id="colorChips"></div>
-      </div>
-      <div class="ls-field">
-        <span class="ls-label">大きさ</span>
-        <div class="size-row">
-          <span>小</span><input id="size" type="range" min="0.5" max="1.8" step="0.05"><span>大</span>
-          <button id="center" class="ls-button small" type="button" title="位置をもとにもどす">⊕ もとの位置</button>
+
+      <div class="design-group" data-group="look">
+        <div class="ls-field">
+          <span class="ls-label">おすすめの組み合わせ <small>（押すとまとめて入る。そこから変えられる）</small></span>
+          <div class="ls-chips" id="recipeChips"></div>
+        </div>
+        <div class="ls-field">
+          <span class="ls-label">テンプレート</span>
+          <div class="tpl-row" id="tplChips"></div>
+        </div>
+        <div class="ls-field">
+          <span class="ls-label">色</span>
+          <div class="ls-swatches" id="colorChips"></div>
+        </div>
+        <div class="ls-field">
+          <span class="ls-label">大きさ <small>（2本指でも）</small></span>
+          <div class="size-row">
+            <span>小</span><input id="size" type="range" min="0.5" max="1.8" step="0.05" aria-label="文字の大きさ"><span>大</span>
+            <button id="center" class="ls-button small" type="button" title="位置と大きさをもとにもどす">⊕ もとにもどす</button>
+          </div>
+        </div>
+        <div class="ls-field">
+          <span class="ls-label">マイテンプレート <small>（いまの形を覚えておく）</small></span>
+          <div class="ls-chips" id="myChips"></div>
         </div>
       </div>
-      <div class="ls-field">
-        <span class="ls-label">いっしょに入れる</span>
-        <div class="ls-chips" id="extraChips"></div>
+
+      <div class="design-group" data-group="text" hidden>
+        <label class="ls-field">
+          <span class="ls-label">ひとこと <small>（好きな文字。数字の上に入る）</small></span>
+          <input id="memo" class="ls-input" maxlength="24" placeholder="例：はじめての寝がえり" autocomplete="off">
+        </label>
+        <!-- ひとことの例（押すと入る。数えかたで変わる） -->
+        <div class="ls-chips example-chips" id="memoChips" aria-label="ひとことの例"></div>
+        <div class="ls-field">
+          <span class="ls-label">数字の出しかた</span>
+          <div class="ls-chips" id="fmtChips"></div>
+        </div>
+        <div class="ls-field">
+          <span class="ls-label">いっしょに入れる</span>
+          <div class="ls-chips" id="extraChips"></div>
+        </div>
       </div>
-      <div class="ls-field">
-        <span class="ls-label">動くスタンプ <small>（いくつでも。写真では止まった形）</small></span>
-        <div class="ls-chips" id="stampChips"></div>
+
+      <div class="design-group" data-group="deco" hidden>
+        <div class="ls-field">
+          <span class="ls-label">動くスタンプ <small>（いくつでも。写真では止まった形）</small></span>
+          <div class="ls-chips" id="stampChips"></div>
+        </div>
+        <div class="ls-field">
+          <span class="ls-label">文字の動き <small>（動画のとき）</small></span>
+          <div class="ls-chips" id="motionChips"></div>
+        </div>
       </div>
-      <div class="ls-field">
-        <span class="ls-label">文字の動き <small>（動画のとき）</small></span>
-        <div class="ls-chips" id="motionChips"></div>
-      </div>
-      <div class="ls-field">
-        <span class="ls-label">保存</span>
-        <label class="check"><input id="saveRaw" type="checkbox"> 加工なし（文字・スタンプなし）の元の写真・動画も残す</label>
-        <p class="ls-hint">いつもは文字・スタンプ入りを保存します。オンにすると、できた画面に「加工なし」の保存ボタンも出ます（カメラで撮ったときだけ）。</p>
-      </div>
-      <div class="ls-field">
-        <span class="ls-label">マイテンプレート <small>（いまの形を覚えておく）</small></span>
-        <div class="ls-chips" id="myChips"></div>
+
+      <div class="design-group" data-group="save" hidden>
+        <div class="ls-field">
+          <span class="ls-label">保存するもの</span>
+          <label class="check"><input id="saveRaw" type="checkbox"> 加工なし（文字・スタンプなし）の元の写真・動画も残す</label>
+          <p class="ls-hint">いつもは文字・スタンプ入りを保存します。オンにすると、できた画面に「加工なし」の保存ボタンも出ます（カメラで撮ったときだけ）。</p>
+        </div>
+        <p class="ls-hint">写真・動画はこの端末の中だけで作ります（サーバーには送りません）。</p>
       </div>
     </div>
   </section>
@@ -197,6 +217,7 @@
     <img id="guide" class="guide" alt="" hidden>
     <p id="countdown" class="countdown" hidden></p>
     <p id="recTime" class="rec-time" hidden>0:00</p>
+    <p id="dayBadge" class="day-badge" hidden></p>
     <p id="shootMsg" class="shoot-msg" hidden></p>
     <p id="dragHint" class="drag-hint" hidden>文字は指で動かせます</p>
   </div>
@@ -220,6 +241,7 @@
     <div class="result-media" id="resultMedia"></div>
     <div class="result-actions">
       <button id="share" class="ls-button is-primary is-block" type="button">📤 保存・共有</button>
+      <p id="saveHint" class="save-hint" hidden></p>
       <a id="download" class="ls-button is-block" download>⬇️ ダウンロード</a>
       <!-- 加工なしの元の写真・動画（設定でオンのとき） -->
       <div id="rawRow" class="raw-row" hidden>

@@ -82,6 +82,9 @@ function openShoot() {
   renderKind();
   restartMotion();
   if (!picked) startCamera();
+  // きょう以外の日で数えているときは、映像の上に出す（まちがえて撮らないように。写真・動画には入らない）
+  $("dayBadge").hidden = !state.day;
+  $("dayBadge").textContent = `📅 ${dotDay(state.day)} で数えています`;
   if (!countLabel()) toast(`${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れると、数字が入ります`);
   // はじめてのときだけ「文字は指で動かせます」
   try {
@@ -150,6 +153,7 @@ function takePhoto() {
   drawScene(c.getContext("2d"), w, h, { src: source(), mirror: mirrored(), t: 0, look: state.look, label: countLabel(), still: true });
   const raw = rawPhotoCanvas(); // 文字を描く前の、同じ瞬間の映像
   flash();
+  navigator.vibrate?.(30); // Android：撮った手ごたえ
   const toBlob = (cv) => new Promise((ok) => (cv ? cv.toBlob(ok, "image/jpeg", 0.95) : ok(null)));
   Promise.all([toBlob(c), toBlob(raw)]).then(([blob, rawBlob]) => {
     if (blob) showResult(blob, fileName("jpg"), rawBlob && { blob: rawBlob, name: fileName("jpg", "raw") });
@@ -210,6 +214,7 @@ async function startRecording() {
     showResult(blob, fileName(ext(blob)), rawBlob && { blob: rawBlob, name: fileName(ext(rawBlob), "raw") });
   });
   restartMotion(); // 動き（カウントアップ・ぽよん）は録りはじめから
+  navigator.vibrate?.(40);
   recorder.start(1000);
   rawRecorder?.start(1000);
   recStart = performance.now();
@@ -292,6 +297,8 @@ function showResult(blob, name, raw = null) {
   const file = new File([blob], name, { type: blob.type });
   const canShare = !!navigator.canShare?.({ files: [file] });
   $("share").hidden = !canShare;
+  $("saveHint").hidden = !canShare;
+  $("saveHint").textContent = `iPhone は「📤 保存・共有」→「${blob.type.startsWith("video") ? "ビデオを保存" : "画像を保存"}」で写真アプリに入ります。`;
   $("download").href = url;
   $("download").download = name;
   $("download").classList.toggle("is-primary", !canShare);
@@ -333,22 +340,28 @@ $("again").addEventListener("click", () => {
 });
 
 // ---- 文字の形のシート（はじめの画面の #design を移す） ----
+// シートを開いているあいだは、映像をシートの上に小さくして、全部見えるように（下のボタンはしまう）
 function openDesign() {
   $("designSlot").append($("design"));
   $("designSheet").hidden = false;
+  $("shoot").classList.add("is-designing");
+  requestAnimationFrame(fitStage);
 }
 function closeDesign() {
   if ($("designSheet").hidden) return;
   $("designSheet").hidden = true;
+  $("shoot").classList.remove("is-designing");
   $("preview").closest(".ls-panel").append($("design"));
+  requestAnimationFrame(fitStage);
 }
 
 function bindShoot() {
   $("cameraOpen").addEventListener("click", () => {
+    if (needDate()) return;
     picked = null;
     openShoot();
   });
-  $("pickOpen").addEventListener("click", pickPhoto);
+  $("pickOpen").addEventListener("click", () => needDate() || pickPhoto());
   $("shootPick").addEventListener("click", pickPhoto);
   $("shootHome").addEventListener("click", closeShoot);
   $("flip").addEventListener("click", () => {

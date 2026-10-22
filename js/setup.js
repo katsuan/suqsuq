@@ -216,12 +216,31 @@ function renderToday() {
   const box = $("today");
   if (!L) {
     box.innerHTML = `<p class="ls-hint">${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れると、ここに数えた日が出ます。</p>`;
+    $("cameraOpen").textContent = "📅 まず日付を入れる";
     return;
   }
+  $("cameraOpen").textContent = "📷 カメラを開く";
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
   box.innerHTML =
     `<p class="today-main">${state.day ? "その日は" : "きょうは"} <span>${esc(L.top)}</span> <b>${esc(L.big)}</b><span>${esc(L.unit)}</span> <span>${esc(L.small)}</span></p>` +
     `<p class="ls-hint">${esc(nextMilestone())}</p>`;
+}
+
+// 文字の形のタブ（形・文字・かざり・保存）
+function renderDesignTab() {
+  document.querySelectorAll("[data-dtab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.dtab === state.designTab)));
+  document.querySelectorAll("[data-group]").forEach((g) => (g.hidden = g.dataset.group !== state.designTab));
+}
+
+// 日付がまだないとき：カメラ・写真のボタンを押したら、日付の欄へ案内する
+function needDate() {
+  if (countLabel()) return false;
+  const input = $(state.mode === "womb" ? "due" : "birth");
+  input.scrollIntoView({ behavior: "smooth", block: "center" });
+  input.classList.add("is-need");
+  setTimeout(() => input.classList.remove("is-need"), 1600);
+  toast(`さきに${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れてください`);
+  return true;
 }
 
 function renderMode() {
@@ -234,6 +253,7 @@ function renderAll() {
   renderFormats();
   renderDesign();
   renderExamples();
+  renderDesignTab();
   renderToday();
   renderCalendar();
   $("dayMeta").textContent = state.day ? dotDay(state.day) : "きょう";
@@ -311,6 +331,13 @@ function bindSetup() {
       state.mode = b.dataset.mode;
       save();
       renderAll();
+    })
+  );
+  document.querySelectorAll("[data-dtab]").forEach((b) =>
+    b.addEventListener("click", () => {
+      state.designTab = b.dataset.dtab;
+      save();
+      renderDesignTab();
     })
   );
   $("name").value = state.name;
