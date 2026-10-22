@@ -90,56 +90,65 @@ def tape_reach():
 
 
 def build_tape():
-    """ロゴの1つ目の Q：メジャー（すくすく育つのを測る）。輪はケース。テープはケースの中（輪の下がわ）から
-    輪にそって出てきて（参考：巻き尺のケースのすき間からテープが出る絵）、「Su」の下をゆるくたわみながら通り、
-    2つ目の Q（ふたばの芽）の手前まで。テープのまわりに背景の色のふちをつけて、輪に差しこまれているように見せる。
+    """ロゴの1つ目の Q：メジャー（すくすく育つのを測る）。輪（O）はケース。テープは Q のしっぽの位置（右下）で
+    O に差しこまれていて、そこから右下へ出て、「Su」の下をゆるくたわみながら通り、2つ目の Q（ふたばの芽）の手前まで。
+    テープは Q のしっぽと同じく O の線をまたいで内がわ（穴）まで刺さり、まわりの背景の色のふちで O との境目をはっきり見せる。
+    目盛りはテープ全体に、細く短く、少しうすく（主張しすぎない）。
     テープは "free"（次の字の位置をずらさない）。輪の中心・太さはふたばの Q と同じ。ふたばの Q と同じだけずらす"""
     c = C0
     tape_w = 7
-    base = c[1] + RING_OUTER + tape_w / 2 - 1  # 輪を出たあとのテープの真ん中の高さ
+    base = c[1] + RING_OUTER + tape_w / 2 + 1.2  # 「Su」の下を通るときのテープの真ん中（字にふれない）
     x1 = c[0] + tape_reach() - 4
 
-    # 1) ケースの中：輪の線の上を、左下（140°）から真下の少し右（80°）へ（y が下向きなので、角度をへらすと右へ進む）
-    arc_pts = [polar(c, a, R + 1) for a in range(140, 79, -5)]
-    ax, ay = arc_pts[-1]
+    def bez(p0, p1, p2, p3, t):
+        u = 1 - t
+        return tuple(u**3 * a + 3 * u * u * t * b + 3 * u * t * t * cc + t**3 * d for a, b, cc, d in zip(p0, p1, p2, p3))
 
-    # 2) ケースの外：輪を出て、少し下がりながら「Su」の下へ。まんなかで少したるむ
-    def at(t):
-        x = ax + (x1 - ax) * t
-        ease = min(1, t / 0.22)
-        ease = ease * ease * (3 - 2 * ease)  # はじめはなめらかに下りる
-        y = ay + (base + 1 - ay) * ease + 3.5 * math.sin(math.pi * t) - 1.5 * max(0, t - 0.8) ** 2 / 0.04
-        return (x, y)
+    # 1) O の内がわ（穴）から、しっぽの向き（45°）に O の線をまたいで外へ
+    start, exit_ = polar(c, TAIL_DIR, R - RING_W / 2 - 3), polar(c, TAIL_DIR, RING_OUTER + 4)  # O の内がわ（穴）から
+    # 2) しっぽの向きのまま出て、なめらかに横向きへ（字の下の高さに）
+    turn_end = (exit_[0] + 13, base + 1.5)
+    curve = [bez(exit_, polar(exit_, TAIL_DIR, 5), (turn_end[0] - 6, turn_end[1]), turn_end, k / 12) for k in range(13)]
+    # 3) 横へ：まんなかで少したるみ、先で少し持ち上がる
+    sx = turn_end[0]
+    run = [(sx + (x1 - sx) * t, turn_end[1] + 2.2 * math.sin(math.pi * t) - 1.5 * max(0, t - 0.8) ** 2 / 0.04) for t in (k / 30 for k in range(1, 31))]
+    path = [start] + curve + run
 
-    n = 44
-    out = [at(k / n) for k in range(n + 1)]
-    path = arc_pts + out[1:]
     tape = [
         {"t": "circle", "c": c, "r": R, "alpha": 0.16},  # 輪の内側（うっすら）
-        {"t": "ring", "c": c, "r": R, "w": RING_W},  # ケース（Q の輪）
+        {"t": "ring", "c": c, "r": R, "w": RING_W},  # ケース（O）
         {"t": "circle", "c": c, "r": 6},  # まんなかの軸
         {"t": "circle", "c": c, "r": 2.2, "fill": "bg"},  # 軸のねじ
-        {"t": "line", "p": path, "w": tape_w + 2.6, "fill": "bg", "free": True},  # テープのふち（輪に差しこまれたすき間に見える）
-        {"t": "line", "p": path, "w": tape_w, "free": True},  # テープ
+        # テープは Q のしっぽと同じく、O の線をまたいで内がわまで刺さる。まわりに背景の色のふちをつけて、O との境目をはっきり
+        {"t": "line", "p": path, "w": tape_w + 2.4, "fill": "bg", "free": True},
+        {"t": "line", "p": path, "w": tape_w, "free": True},
     ]
 
-    def normal(t):
-        (px, py), (qx, qy) = at(max(0, t - 0.01)), at(min(1, t + 0.01))
-        d = math.hypot(qx - px, qy - py)
-        return (-(qy - py) / d, (qx - px) / d)  # 下向きの法線
+    # 線の長さにそって、位置と下向きの法線を出す
+    seg = [math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(path, path[1:])]
+    total = sum(seg)
+
+    def along(dist):
+        for (a, b), L in zip(zip(path, path[1:]), seg):
+            if dist <= L:
+                t = dist / L
+                return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t), (-(b[1] - a[1]) / L, (b[0] - a[0]) / L)
+            dist -= L
+        a, b = path[-2], path[-1]
+        return b, (-(b[1] - a[1]) / seg[-1], (b[0] - a[0]) / seg[-1])
 
     # 先の金具（つめ）：テープの向きに直角に、下へ
-    nx, ny = normal(1)
-    ex, ey = out[-1]
+    (ex, ey), (nx, ny) = along(total)
     tape.append({"t": "line", "p": [(ex - nx * 2, ey - ny * 2), (ex + nx * 7, ey + ny * 7)], "w": 3.2, "free": True})
-    # 目盛り：輪の外に出てから。テープの上のふちから直角に、長い・短いを交互に
-    t, k = (c[0] + RING_OUTER + 3 - ax) / (x1 - ax), 0
-    while t < 0.95:
-        (px, py), (nx, ny) = at(t), normal(t)
-        top = (px - nx * (tape_w / 2 - 0.7), py - ny * (tape_w / 2 - 0.7))
-        ln = 3.4 if k % 2 == 0 else 1.9
-        tape.append({"t": "line", "p": [top, (top[0] + nx * ln, top[1] + ny * ln)], "w": 1.3, "fill": "bg", "free": True})
-        t += 4 / (x1 - ax)
+    # 目盛り：O を出たところから先まで、テープ全体に。上のふちから直角に、細く短く、少しうすく
+    d0 = (RING_OUTER + 2.5) - (R - RING_W / 2 - 3)  # O を出た少し先から
+    d, k = d0, 0
+    while d < total - 3:
+        (px, py), (nx, ny) = along(d)
+        top = (px - nx * (tape_w / 2 - 0.6), py - ny * (tape_w / 2 - 0.6))
+        ln = 2.6 if k % 2 == 0 else 1.5
+        tape.append({"t": "line", "p": [top, (top[0] + nx * ln, top[1] + ny * ln)], "w": 1, "fill": "bg", "alpha": 0.7, "free": True})
+        d += 3.2
         k += 1
     move = lambda pt: (pt[0] + _DX, pt[1] + _DY)  # noqa: E731
     return [{**sh, **({"c": move(sh["c"])} if "c" in sh else {}), **({"p": [move(q) for q in sh["p"]]} if "p" in sh else {})} for sh in tape]
