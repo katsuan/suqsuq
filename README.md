@@ -50,6 +50,7 @@
 
 - index.html・style.css：画面（部品はおくるんの Q キット `https://katsuan.github.io/line-share/shared/ui.css`。色は style.css の :root でピーチ）
 - js/：core.js 共通・state・日数の計算 ／ calendar.js 節目をカレンダーに ／ draw.js 描く（テンプレート・スタンプ・動き） ／ setup.js はじめの画面 ／ shoot.js 撮る画面 ／ main.js 最初の表示と毎フレームの描画
+- 公開する前に `sh tools/stamp.sh`（JS・CSS・ロゴ・アイコンに版の番号 ?v=。付けないと、スマホが前のファイルを使いつづけて、直したのに変わらないことがある）
 - tools/icon.py：アイコン・ロゴ・OGP（おくるんの tools/brandkit.py。ピーチの角丸に、ふたばの芽が出た Q。横ロゴ logo.svg は「SuQ²」：ふたばの Q の右上に小さな 2）
 
 ## これから
