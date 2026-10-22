@@ -184,10 +184,16 @@ function renderDesign() {
       e.preventDefault();
       clearTimeout(hold);
       held = true;
-      if (confirm(`マイテンプレート「${m.name}」を消しますか？`)) {
-        state.myLooks.splice(i, 1);
-        lookChanged();
-      }
+      // 聞かずに消して、「元に戻す」を出す
+      state.myLooks.splice(i, 1);
+      lookChanged();
+      LineShareUI.toast(`「${m.name}」を消しました`, {
+        actionLabel: "元に戻す",
+        onAction: () => {
+          state.myLooks.splice(i, 0, m);
+          lookChanged();
+        }
+      });
     };
     b.addEventListener("contextmenu", del);
     b.addEventListener("pointerdown", () => (hold = setTimeout(() => del(new Event("x")), 700)));
@@ -195,8 +201,8 @@ function renderDesign() {
     my.append(b);
   });
   if (state.myLooks.length < 8) {
-    my.append(chip("＋ いまの形を保存", false, () => {
-      const name = prompt("名前をつけてください（例：100日の記念）", `${tplOf(look.tpl).label}${state.myLooks.length + 1}`);
+    my.append(chip("＋ いまの形を保存", false, async () => {
+      const name = await LineShareUI.ask({ title: "名前をつけてください", text: "例：100日の記念", input: `${tplOf(look.tpl).label}${state.myLooks.length + 1}`, ok: "保存", maxLength: 12 });
       if (!name) return;
       state.myLooks.push({ name: name.slice(0, 12), look: JSON.parse(JSON.stringify(look)) });
       lookChanged();

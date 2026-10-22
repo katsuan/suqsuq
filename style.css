@@ -135,3 +135,22 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .result-actions a.ls-button { text-decoration: none; }
 .save-hint { margin: -2px 0 0; text-align: center; font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
 .raw-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--ls-accent-soft); font-size: 13px; font-weight: 700; }
+
+/* ---- 暗い表示（index.html の data-ls-dark="auto"。Q キットの色は ui.css が暗くする） ----
+ * 撮る画面（.shoot。カメラの上）と、できた写真・動画そのものは、いまのまま。
+ */
+@media (prefers-color-scheme: dark) {
+  :root[data-ls-dark="auto"] {
+    --ink: #f1e9e6;
+    --ink-soft: #b9aaa4;
+    background-color: var(--ls-bg);
+  }
+  :root[data-ls-dark="auto"] body { background: var(--ls-bg); }
+  :root[data-ls-dark="auto"] .design-tabs button[aria-selected="true"] { background: var(--ls-surface); }
+  :root[data-ls-dark="auto"] .preview-wrap { background: var(--ls-surface-sub); }
+  :root[data-ls-dark="auto"] .design-sheet,
+  :root[data-ls-dark="auto"] .result-card { background: var(--ls-surface); }
+  /* カメラの上のボタンは白地に暗い字のまま */
+  :root[data-ls-dark="auto"] .seg button[aria-pressed="true"],
+  :root[data-ls-dark="auto"] .round.is-on { color: #3e302b; }
+}

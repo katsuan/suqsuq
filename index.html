@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-ls-dark="auto">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,8 @@
 <meta property="og:locale" content="ja_JP">
 <meta property="og:image" content="ogp.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#fff7f3">
+<meta name="theme-color" content="#fff7f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16151a" media="(prefers-color-scheme: dark)">
 <!-- アイコン・ロゴ・OGP は tools/icon.py で作る -->
 <link rel="icon" href="icon.svg?v=202610221419" type="image/svg+xml">
 <link rel="icon" href="icon-32.png?v=202610221419" type="image/png" sizes="32x32">
@@ -26,7 +27,8 @@
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Mochiy+Pop+One&family=Yomogi&family=Shippori+Mincho:wght@600&family=Cormorant+Garamond:ital,wght@1,600&family=Jua&display=swap" rel="stylesheet">
 <!-- Q キット（おくるんの共通部品）。色と字は style.css の :root で、すくすくのピーチに -->
 <link rel="stylesheet" href="https://katsuan.github.io/line-share/shared/ui.css">
-<link rel="stylesheet" href="style.css?v=202610221419">
+<script src="https://katsuan.github.io/line-share/shared/ui.js" defer></script>
+<link rel="stylesheet" href="style.css?v=202610221446">
 </head>
 <body class="ls-has-sendbar">
 <!-- はじめの画面：だれの・いつからを入れて、文字の形を決める -->
@@ -46,7 +48,7 @@
   <section class="ls-panel">
     <div class="who">
       <label class="ls-field">
-        <span class="ls-label">なまえ <small>（なくてもよい）</small></span>
+        <span class="ls-label">なまえ <small>（なくてもOK）</small></span>
         <input id="name" class="ls-input" maxlength="16" placeholder="例：はると" autocomplete="off">
       </label>
       <label class="ls-field" data-mode-only="born">
@@ -105,7 +107,7 @@
   <section class="ls-panel">
     <div class="ls-panel-head">
       <h2 class="ls-panel-title">🎨 写真に入れる文字</h2>
-      <p class="ls-panel-note">見本の上で、文字を指で動かせます（2本指で大きさ）。</p>
+      <p class="ls-panel-note">見本の文字は、指で動かせます。</p>
     </div>
     <div class="preview-wrap">
       <canvas id="preview" class="stage" aria-label="見本"></canvas>
@@ -121,7 +123,7 @@
 
       <div class="design-group" data-group="look">
         <div class="ls-field">
-          <span class="ls-label">おすすめの組み合わせ <small>（押すとまとめて入る。そこから変えられる）</small></span>
+          <span class="ls-label">おすすめの組み合わせ</span>
           <div class="ls-chips" id="recipeChips"></div>
         </div>
         <div class="ls-field">
@@ -164,7 +166,7 @@
 
       <div class="design-group" data-group="deco" hidden>
         <div class="ls-field">
-          <span class="ls-label">動くスタンプ <small>（いくつでも。写真では止まった形）</small></span>
+          <span class="ls-label">動くスタンプ <small>（いくつでも）</small></span>
           <div class="ls-chips" id="stampChips"></div>
         </div>
         <div class="ls-field">
@@ -176,8 +178,8 @@
       <div class="design-group" data-group="save" hidden>
         <div class="ls-field">
           <span class="ls-label">保存するもの</span>
-          <label class="check"><input id="saveRaw" type="checkbox"> 加工なし（文字・スタンプなし）の元の写真・動画も残す</label>
-          <p class="ls-hint">いつもは文字・スタンプ入りを保存します。オンにすると、できた画面に「加工なし」の保存ボタンも出ます（カメラで撮ったときだけ）。</p>
+          <label class="check"><input id="saveRaw" type="checkbox"> 加工なしの写真・動画も残す</label>
+          <p class="ls-hint">できた画面に「加工なし」の保存ボタンも出ます（カメラで撮ったときだけ）。</p>
         </div>
         <p class="ls-hint">写真・動画はこの端末の中だけで作ります（サーバーには送りません）。</p>
       </div>
@@ -191,7 +193,7 @@
 <div class="ls-sendbar" id="setupBar">
   <div class="ls-sendbar-inner">
     <div class="ls-sendbar-row">
-      <button id="pickOpen" class="ls-button ls-send-secondary" type="button">🖼 写真を選ぶ</button>
+      <button id="pickOpen" class="ls-button ls-send-secondary" type="button" aria-label="写真を選ぶ">🖼 写真</button>
       <button id="cameraOpen" class="ls-button is-primary" type="button">📷 カメラを開く</button>
     </div>
   </div>
@@ -256,11 +258,13 @@
 <div id="toast" class="ls-toast" hidden></div>
 
 <!-- 動き（役ごとのファイル。この順に読む。いちばん先の core.js の頭に、ファイルの一覧） -->
-<script src="js/core.js?v=202610221419"></script>
-<script src="js/draw.js?v=202610221419"></script>
-<script src="js/setup.js?v=202610221419"></script>
-<script src="js/calendar.js?v=202610221419"></script>
-<script src="js/shoot.js?v=202610221419"></script>
-<script src="js/main.js?v=202610221419"></script>
+<script src="js/core.js?v=202610221446"></script>
+<script src="js/draw.js?v=202610221446"></script>
+<script src="js/setup.js?v=202610221446"></script>
+<script src="js/calendar.js?v=202610221446"></script>
+<script src="js/shoot.js?v=202610221446"></script>
+<script src="js/main.js?v=202610221446"></script>
+<!-- 電波がなくても開けるように（sw.js） -->
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});</script>
 </body>
 </html>
