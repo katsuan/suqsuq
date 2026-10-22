@@ -1,6 +1,6 @@
 # すくすく（SuQSuQ）
 
-生まれて◯日・生後◯か月・妊娠◯週を、写真や動画にそのまま入れて残すツール。名前は「すくすく」の「く」を Q にした、コネクト〜ConneQt〜の仲間。キャッチコピーは「すくすく、まいにちが記念日」。
+生まれて◯日・生後◯か月・妊娠◯週を、写真や動画にそのまま入れて残すツール。名前は「すくすく」の「く」を Q にした、コネクト〜ConneQt〜の仲間。横ロゴは「SuQ²」（SuQ の2乗で SuQSuQ）。キャッチコピーは「すくすく、まいにちが記念日」。
 
 確認用URL: https://katsuan.github.io/suqsuq/ （まだ確認中なので noindex。ConneQt の一覧・ポートフォリオには載せていない）
 
@@ -48,7 +48,7 @@
 
 - index.html・style.css：画面（部品はおくるんの Q キット `https://katsuan.github.io/line-share/shared/ui.css`。色は style.css の :root でピーチ）
 - js/：core.js 共通・state・日数の計算 ／ calendar.js 節目をカレンダーに ／ draw.js 描く（テンプレート・スタンプ・動き） ／ setup.js はじめの画面 ／ shoot.js 撮る画面 ／ main.js 最初の表示と毎フレームの描画
-- tools/icon.py：アイコン・ロゴ・OGP（おくるんの tools/brandkit.py。ピーチの角丸に、ふたばの芽が出た Q。ロゴの1つ目の Q はメジャー（目盛りのテープが「Su」の下を通って、最後の Q の手前まで）、最後の Q はアイコンと同じふたばの芽）
+- tools/icon.py：アイコン・ロゴ・OGP（おくるんの tools/brandkit.py。ピーチの角丸に、ふたばの芽が出た Q。横ロゴ logo.svg は「SuQ²」：ふたばの Q の右上に小さな 2）
 
 ## これから
 
@@ -70,10 +70,12 @@
 - アプリ版：端末の中だけの通知（ローカル通知）でできる。サーバーいらず
 - Web Push：ホーム画面に追加したときだけ（iPhone は iOS 16.4 から）。送る係に Cloudflare Workers の定期実行などがいる
 
-## ロゴの候補（見くらべ中）
+## ロゴ
 
-`python3 tools/logo_variants.py` で design/logo-candidates/ に書き出す（ページのロゴは tools/icon.py の logo.svg のまま）。
+横ロゴは「SuQ²」（2026-10-22 に決定。tools/icon.py の logo_square → logo.svg）。
 
-- logo-plate-light（候補）：SuQsuQ。左の SuQ（ふたばの Q）が重く、右の suQ（小文字・最後の Q はメジャー）が軽い天秤。SuQ ごとに皿（下線）
-- logo-square（候補）：SuQ²。SuQ の2乗で SuQSuQ
+見くらべた候補は `python3 tools/logo_variants.py` で design/logo-candidates/ に書き出す：
+
+- logo-plate-light：SuQsuQ。左の SuQ（ふたばの Q）が重く、右の suQ（小文字・最後の Q はメジャー）が軽い天秤。SuQ ごとに皿（下線）。ロゴには使わず、共有の画像（OGP）・使い方の飾り・紹介カードの絵に使えそう
+- logo-square：SuQ²（いまのロゴと同じ形）
 - そのほか見くらべた案（2つともふたば・つり下げ天秤・上皿天秤・傾き3パターン）も同じ場所に
