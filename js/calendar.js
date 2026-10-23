@@ -37,6 +37,25 @@ function milestoneList(s = state) {
     .map((m) => ({ ...m, date: dayStr(m.date), days: Math.round((m.date - from) / DAY) }));
 }
 
+// くろのす（Qronos）で「あと何日？」を数えるページ。日付・名前を入れた状態で開く
+// おなかの中：出産予定日まで。生まれてから：つぎの節目まで・毎年の誕生日
+const QRONOS_URL = "https://katsuan.github.io/countdown/index.html";
+function qronosLinks(s = state) {
+  const who = s.name ? `${s.name}の` : "";
+  const url = (q) => `${QRONOS_URL}?${new URLSearchParams({ ...q, color: "sunset" })}`;
+  if (s.mode === "womb") {
+    const due = parseDay(s.due);
+    if (isNaN(due) || due < parseDay(todayStr())) return [];
+    return [{ label: "👶 出産予定日まで", url: url({ type: "until", date: s.due, title: `${s.name ? s.name + "に" : "赤ちゃんに"}会える日`, emoji: "👶" }) }];
+  }
+  if (isNaN(parseDay(s.birth))) return [];
+  const links = [];
+  const next = milestoneList({ ...s, day: "" }).find((m) => m.days > 0);
+  if (next) links.push({ label: `🎉 ${next.note || next.label}まで`, url: url({ type: "until", date: next.date, title: `${who}${next.note || next.label}`, emoji: "🎉" }) });
+  links.push({ label: "🎂 毎年の誕生日", url: url({ type: "yearly", date: s.birth, title: `${who}誕生日`, emoji: "🎂" }) });
+  return links;
+}
+
 const eventTitle = (m, s = state) => `🌱 ${s.name ? s.name + " " : ""}${m.label}${m.note ? `（${m.note}）` : ""}`;
 const eventDetails = () => `すくすくで、きょうの写真を撮ろう\n${PAGE_URL}`;
 const compact = (d) => d.replace(/-/g, "");

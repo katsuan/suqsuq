@@ -231,7 +231,20 @@ function renderToday() {
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
   box.innerHTML =
     `<p class="today-main">${state.day ? "その日は" : "きょうは"} <span>${esc(L.top)}</span> <b>${esc(L.big)}</b><span>${esc(L.unit)}</span> <span>${esc(L.small)}</span></p>` +
-    `<p class="ls-hint">${esc(nextMilestone())}</p>`;
+    `<p class="ls-hint">${esc(nextMilestone())}</p>` +
+    qronosRow();
+}
+
+// くろのすで「あと何日？」を数えるページを開く（日付と名前を入れて）
+function qronosRow() {
+  const links = qronosLinks();
+  if (!links.length) return "";
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+  return (
+    `<div class="qronos-links"><span class="ls-hint">⏳ くろのすで数える</span>` +
+    links.map((l) => `<a class="ls-chip is-small" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("") +
+    "</div>"
+  );
 }
 
 // 文字の形のタブ（形・文字・かざり・保存）

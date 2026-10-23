@@ -153,3 +153,7 @@ input.date::-webkit-date-and-time-value { text-align: left; }
   :root[data-ls-dark="auto"] .seg button[aria-pressed="true"],
   :root[data-ls-dark="auto"] .round.is-on { color: #3e302b; }
 }
+
+/* くろのすで数える（いまの数えの下） */
+.qronos-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
+.qronos-links .ls-chip { text-decoration: none; }

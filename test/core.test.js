@@ -24,7 +24,7 @@ function load({ stored = null, search = "" } = {}) {
     window: {}
   };
   vm.createContext(ctx);
-  vm.runInContext(read("js/core.js") + "\n" + read("js/calendar.js") + "\n;globalThis.__ = { state, fromLink, countLabel, milestoneList, icsFor, save };", ctx);
+  vm.runInContext(read("js/core.js") + "\n" + read("js/calendar.js") + "\n;globalThis.__ = { state, fromLink, countLabel, milestoneList, icsFor, save, qronosLinks };", ctx);
   return { ...ctx.__, head, history: ctx.history, store };
 }
 
@@ -134,4 +134,29 @@ test("かぞく（KazoQ）のリンクの形：?due= ／ ?birth= だけでも受
   const birth = load({ search: "?birth=2026-07-14" });
   assert.equal(birth.state.mode, "born");
   assert.equal(birth.state.birth, "2026-07-14");
+});
+
+test("くろのすへ：おなかの中は出産予定日まで、生まれてからはつぎの節目と毎年の誕生日（日付と名前を渡す）", () => {
+  const future = new Date(Date.now() + 100 * 864e5).toISOString().slice(0, 10);
+  const womb = load({ stored: { mode: "womb", due: future, name: "ひな" } });
+  const [w] = womb.qronosLinks();
+  const wq = new URL(w.url).searchParams;
+  assert.equal(wq.get("type"), "until");
+  assert.equal(wq.get("date"), future);
+  assert.equal(wq.get("title"), "ひなに会える日");
+  const past = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const born = load({ stored: { mode: "born", birth: past, name: "はると" } });
+  const links = born.qronosLinks();
+  assert.equal(links.length, 2);
+  const yq = new URL(links[1].url).searchParams;
+  assert.equal(yq.get("type"), "yearly");
+  assert.equal(yq.get("date"), past);
+  assert.equal(yq.get("title"), "はるとの誕生日");
+  assert.equal(new URL(links[0].url).searchParams.get("type"), "until");
+  // 日付がない・過ぎた予定日なら出さない
+  assert.equal(load({ stored: { mode: "born" } }).qronosLinks().length, 0);
+  assert.equal(load({ stored: { mode: "womb", due: past } }).qronosLinks().length, 0);
+  // 名前に危ない文字が入っていても、URL の中身として渡るだけ
+  const x = load({ stored: { mode: "born", birth: past, name: XSS } }).qronosLinks();
+  assert.ok(x[1].url.startsWith("https://katsuan.github.io/countdown/index.html?"));
 });
