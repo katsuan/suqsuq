@@ -22,7 +22,8 @@ function lookChanged() {
 // ひとことの例（押すと入る）
 const MEMO_EXAMPLES = {
   born: ["はじめまして", "ようこそ わが家へ", "お食い初め", "ハーフバースデー", "はじめての寝がえり", "はじめてのおすわり", "はじめての一歩", "1さい おめでとう", "すやすや"],
-  womb: ["おなかの中から こんにちは", "もうすぐ会えるね", "安定期に入りました", "はじめての胎動", "マタニティフォト", "あと少し！"]
+  womb: ["おなかの中から こんにちは", "もうすぐ会えるね", "安定期に入りました", "はじめての胎動", "マタニティフォト", "あと少し！"],
+  anniv: ["いつもありがとう", "これからもよろしくね", "記念日おめでとう", "100日記念", "ふたりの記念日", "つづけてきたね"]
 };
 // おすすめの組み合わせ（スタンプ・文字の見本）。押すと形・色・スタンプ・動き・ひとことをまとめて入れる
 const RECIPES = {
@@ -39,6 +40,12 @@ const RECIPES = {
     { label: "🫧 おなかの中", tpl: "fuwari", color: "#5aa9e6", stamps: ["bubble", "sparkle"], motion: "float", memo: "おなかの中から こんにちは" },
     { label: "🌸 安定期", tpl: "hand", color: "#ff8fab", stamps: ["petal"], motion: "float", memo: "安定期に入りました" },
     { label: "⏳ あと少し", tpl: "badge", color: "#e9735a", stamps: ["sparkle", "star"], motion: "count", memo: "あと少し！" }
+  ],
+  anniv: [
+    { label: "💞 ふたりの記念日", tpl: "elegant", color: "#ff8fab", stamps: ["heart", "sparkle"], motion: "float", memo: "ふたりの記念日" },
+    { label: "💯 100日記念", tpl: "badge", color: "#e9735a", stamps: ["confetti", "sparkle"], motion: "count", memo: "100日記念" },
+    { label: "🎉 ◯周年", tpl: "pop", color: "#f4b740", stamps: ["confetti", "balloon"], motion: "pop", memo: "記念日おめでとう" },
+    { label: "🌱 つづけてきた", tpl: "hand", color: "#5cb85c", stamps: ["sparkle", "star"], motion: "wave", memo: "つづけてきたね" }
   ]
 };
 function setMemo(text) {
@@ -68,7 +75,7 @@ function renderExamples() {
 function renderFormats() {
   const box = $("fmtChips");
   box.replaceChildren();
-  const key = state.mode === "womb" ? "fmtWomb" : "fmtBorn";
+  const key = MODES[state.mode].fmtKey;
   for (const f of FORMATS[state.mode]) {
     box.append(chip(f.label, state[key] === f.id, () => {
       state[key] = f.id;
@@ -223,14 +230,14 @@ function renderToday() {
   const box = $("today");
   if (!L) {
     // qcheck-ok: W1 決まった文字だけ
-    box.innerHTML = `<p class="ls-hint">${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れると、ここに数えた日が出ます。</p>`;
+    box.innerHTML = `<p class="ls-hint">${MODES[state.mode].dateWord}を入れると、ここに数えた日が出ます。</p>`;
     $("cameraOpen").textContent = "📅 まず日付を入れる";
     return;
   }
   $("cameraOpen").textContent = "📷 カメラを開く";
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
   box.innerHTML =
-    `<p class="today-main">${state.day ? "その日は" : "きょうは"} <span>${esc(L.top)}</span> <b>${esc(L.big)}</b><span>${esc(L.unit)}</span> <span>${esc(L.small)}</span></p>` +
+    `<p class="today-main">${state.day ? "その日は" : "きょうは"} <span>${esc(L.top)}</span> <span class="nw"><b>${esc(L.big)}</b><span>${esc(L.unit)}</span></span> <span>${esc(L.small)}</span></p>` +
     `<p class="ls-hint">${esc(nextMilestone())}</p>` +
     qronosRow();
 }
@@ -256,18 +263,19 @@ function renderDesignTab() {
 // 日付がまだないとき：カメラ・写真のボタンを押したら、日付の欄へ案内する
 function needDate() {
   if (countLabel()) return false;
-  const input = $(state.mode === "womb" ? "due" : "birth");
+  const input = $(MODES[state.mode].input);
   input.scrollIntoView({ behavior: "smooth", block: "center" });
   input.classList.add("is-need");
   setTimeout(() => input.classList.remove("is-need"), 1600);
-  $("dateError").textContent = `さきに${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れてね`;
+  $("dateError").textContent = `さきに${MODES[state.mode].dateWord}を入れてね`;
   $("dateError").hidden = false;
   return true;
 }
 
 function renderMode() {
   document.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.mode === state.mode)));
-  document.querySelectorAll("[data-mode-only]").forEach((el) => (el.hidden = el.dataset.modeOnly !== state.mode));
+  // data-mode-only="born anniv" のように、空白で区切って複数の数えかたで出せる
+  document.querySelectorAll("[data-mode-only]").forEach((el) => (el.hidden = !el.dataset.modeOnly.split(" ").includes(state.mode)));
 }
 
 function renderAll() {
@@ -386,6 +394,14 @@ function bindSetup() {
   renderStatsMeta();
   $("birth").value = state.birth;
   $("due").value = state.due;
+  $("since").value = state.since;
+  $("sinceTitle").value = state.sinceTitle;
+  $("sinceTitle").addEventListener("input", () => {
+    state.sinceTitle = $("sinceTitle").value.trim();
+    save();
+    renderToday();
+    renderCalendar();
+  });
   $("dayOne").checked = state.dayOne;
   $("name").addEventListener("input", () => {
     state.name = $("name").value.trim();
@@ -393,7 +409,7 @@ function bindSetup() {
     renderToday();
     renderCalendar();
   });
-  for (const id of ["birth", "due"]) {
+  for (const id of ["birth", "due", "since"]) {
     $(id).addEventListener("change", () => {
       state[id] = $(id).value;
       save();

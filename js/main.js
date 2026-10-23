@@ -41,5 +41,5 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 // 日付がまだないときの見本の文字
-const SAMPLE_LABEL = () => countLabel({ ...state, day: "", birth: "2026-01-01", due: "2026-12-31", ...(state.mode === "born" ? { day: "2026-04-10" } : { day: "2026-07-05" }) });
+const SAMPLE_LABEL = () => countLabel({ ...state, day: "", birth: "2026-01-01", due: "2026-12-31", since: "2026-01-01", ...(state.mode === "womb" ? { day: "2026-07-05" } : { day: "2026-04-10" }) });
 requestAnimationFrame(frame);

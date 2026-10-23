@@ -30,7 +30,7 @@
 <!-- Q キット（おくるんの共通部品）。色と字は style.css の :root で、すくすくのピーチに -->
 <link rel="stylesheet" href="https://katsuan.github.io/line-share/shared/ui.css">
 <script src="https://katsuan.github.io/line-share/shared/ui.js" defer></script>
-<link rel="stylesheet" href="style.css?v=202610231129">
+<link rel="stylesheet" href="style.css?v=202610231138">
 </head>
 <body class="ls-has-sendbar">
 <!-- はじめの画面：だれの・いつからを入れて、文字の形を決める -->
@@ -42,8 +42,9 @@
   <p class="ls-brand-copy">すくすく、まいにちが記念日</p>
 
   <div class="ls-tabs" role="tablist" aria-label="数えかた">
-    <button class="ls-tab" type="button" role="tab" data-mode="born" aria-selected="true">👶 生まれてから</button>
+    <button class="ls-tab" type="button" role="tab" data-mode="born" aria-selected="true">👶 生まれて</button>
     <button class="ls-tab" type="button" role="tab" data-mode="womb" aria-selected="false">🤰 おなかの中</button>
+    <button class="ls-tab" type="button" role="tab" data-mode="anniv" aria-selected="false">💞 記念日</button>
   </div>
 
   <!-- だれの・いつから -->
@@ -61,6 +62,14 @@
         <span class="ls-label">出産予定日</span>
         <input id="due" class="ls-input date" type="date">
       </label>
+      <label class="ls-field" data-mode-only="anniv" hidden>
+        <span class="ls-label">記念日の名前</span>
+        <input id="sinceTitle" class="ls-input" maxlength="16" placeholder="例：付き合った日" autocomplete="off">
+      </label>
+      <label class="ls-field" data-mode-only="anniv" hidden>
+        <span class="ls-label">その日</span>
+        <input id="since" class="ls-input date" type="date">
+      </label>
     </div>
     <!-- 日付がないままカメラ・写真を押したとき（欄のすぐ下に赤い文字で） -->
     <p id="dateError" class="ls-hint is-error" hidden></p>
@@ -74,7 +83,7 @@
           <input id="day" class="ls-input date" type="date">
           <button id="dayToday" class="ls-button" type="button">きょう</button>
         </div>
-        <label class="check" data-mode-only="born"><input id="dayOne" type="checkbox"> 生まれた日を「1日目」と数える（オフなら 0日）</label>
+        <label class="check" data-mode-only="born anniv"><input id="dayOne" type="checkbox"> はじまりの日を「1日目」と数える（オフなら 0日）</label>
       </div>
     </details>
     <!-- 節目をカレンダーに（お知らせはカレンダーのお知らせで。js/calendar.js） -->
@@ -261,12 +270,12 @@
 </div>
 
 <!-- 動き（役ごとのファイル。この順に読む。いちばん先の core.js の頭に、ファイルの一覧） -->
-<script src="js/core.js?v=202610231129"></script>
-<script src="js/draw.js?v=202610231129"></script>
-<script src="js/setup.js?v=202610231129"></script>
-<script src="js/calendar.js?v=202610231129"></script>
-<script src="js/shoot.js?v=202610231129"></script>
-<script src="js/main.js?v=202610231129"></script>
+<script src="js/core.js?v=202610231138"></script>
+<script src="js/draw.js?v=202610231138"></script>
+<script src="js/setup.js?v=202610231138"></script>
+<script src="js/calendar.js?v=202610231138"></script>
+<script src="js/shoot.js?v=202610231138"></script>
+<script src="js/main.js?v=202610231138"></script>
 <!-- 電波がなくても開けるように（sw.js） -->
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});</script>
 <script src="https://katsuan.github.io/line-share/shared/tool-share.js" data-tool="suqsuq" defer></script>

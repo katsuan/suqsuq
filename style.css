@@ -157,3 +157,5 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 /* くろのすで数える（いまの数えの下） */
 .qronos-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
 .qronos-links .ls-chip { text-decoration: none; }
+/* 数字と単位（480日目）は1つのまとまりで折り返す */
+.today-main .nw { white-space: nowrap; }

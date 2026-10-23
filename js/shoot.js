@@ -98,7 +98,7 @@ function openShoot() {
   // きょう以外の日で数えているときは、映像の上に出す（まちがえて撮らないように。写真・動画には入らない）
   $("dayBadge").hidden = !state.day;
   $("dayBadge").textContent = `📅 ${dotDay(state.day)} で数えています`;
-  if (!countLabel()) toast(`${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れると、数字が入ります`);
+  if (!countLabel()) toast(`${MODES[state.mode].dateWord}を入れると、数字が入ります`);
   // はじめてのときだけ「文字は指で動かせます」
   try {
     if (!localStorage.getItem("suqsuq:dragHint")) {

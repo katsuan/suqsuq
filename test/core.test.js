@@ -160,3 +160,39 @@ test("くろのすへ：おなかの中は出産予定日まで、生まれて�
   const x = load({ stored: { mode: "born", birth: past, name: XSS } }).qronosLinks();
   assert.ok(x[1].url.startsWith("https://katsuan.github.io/countdown/index.html?"));
 });
+
+test("記念日から：「付き合った日から 100日目」「1年 2か月」。その日より前は「あと◯日」", () => {
+  const t = load({ stored: { mode: "anniv", since: "2025-01-01", sinceTitle: "付き合った日", dayOne: true } });
+  t.state.day = "2025-04-10"; // 99日たった日（1日目と数えて 100日目）
+  let L = t.countLabel();
+  assert.equal(L.top, "付き合った日から");
+  assert.equal(L.big, "100");
+  assert.equal(L.unit, "日目");
+  t.state.fmtAnniv = "ym";
+  t.state.day = "2026-03-15";
+  L = t.countLabel();
+  assert.deepEqual([L.big, L.unit, L.small], ["1", "年", "2か月"]);
+  t.state.day = "2024-12-25";
+  L = t.countLabel();
+  assert.deepEqual([L.top, L.big], ["付き合った日まで あと", "7"]);
+  // 名前がないときは「記念日から」
+  const u = load({ stored: { mode: "anniv", since: "2025-01-01" } });
+  assert.equal(u.countLabel().top, "記念日から");
+});
+
+test("記念日から：リンク（?since=&title=）で受けとり、節目（100日・◯周年）とくろのすへのボタンが出る", () => {
+  const t = load({ search: `?since=2025-01-01&title=${encodeURIComponent("付き合った日")}` });
+  assert.equal(t.state.mode, "anniv");
+  assert.equal(t.state.since, "2025-01-01");
+  assert.equal(t.state.sinceTitle, "付き合った日");
+  assert.equal(t.history.replaced, "/suqsuq/");
+  const list = t.milestoneList({ ...t.state, day: "2025-01-01" });
+  assert.ok(list.some((m) => m.label === "付き合った日から100日"));
+  assert.ok(list.some((m) => m.note === "1周年" && m.date === "2026-01-01"));
+  const links = t.qronosLinks();
+  const yearly = new URL(links[links.length - 1].url).searchParams;
+  assert.deepEqual([yearly.get("type"), yearly.get("date"), yearly.get("title")], ["yearly", "2025-01-01", "付き合った日"]);
+  // 壊れた・長すぎる名前はそろえる
+  const x = load({ search: `?since=2025-01-01&title=${encodeURIComponent(XSS + "あ".repeat(40))}` });
+  assert.ok(x.state.sinceTitle.length <= 16);
+});

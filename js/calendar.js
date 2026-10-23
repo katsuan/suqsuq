@@ -22,6 +22,13 @@ function milestoneList(s = state) {
       if (!notes[w] && !s.calWeekly) continue;
       list.push({ date: weekDay(w), label: `妊娠${w}週`, note: notes[w] || "" });
     }
+  } else if (s.mode === "anniv") {
+    const since = parseDay(s.since);
+    if (isNaN(since)) return [];
+    const title = s.sinceTitle || "記念日";
+    const nth = (n) => since + (n - (s.dayOne ? 1 : 0)) * DAY;
+    for (const n of [100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000]) list.push({ date: nth(n), label: `${title}から${n}日`, note: "" });
+    for (let y = 1; y <= 10; y++) list.push({ date: addMonths(since, y * 12), label: `${title}から${y}年`, note: `${y}周年` });
   } else {
     const birth = parseDay(s.birth);
     if (isNaN(birth)) return [];
@@ -47,6 +54,15 @@ function qronosLinks(s = state) {
     const due = parseDay(s.due);
     if (isNaN(due) || due < parseDay(todayStr())) return [];
     return [{ label: "👶 出産予定日まで", url: url({ type: "until", date: s.due, title: `${s.name ? s.name + "に" : "赤ちゃんに"}会える日`, emoji: "👶" }) }];
+  }
+  if (s.mode === "anniv") {
+    if (isNaN(parseDay(s.since))) return [];
+    const title = s.sinceTitle || "記念日";
+    const next = milestoneList({ ...s, day: "" }).find((m) => m.days > 0);
+    const out = [];
+    if (next) out.push({ label: `🎉 ${next.note || next.label.replace(`${title}から`, "")}まで`, url: url({ type: "until", date: next.date, title: next.note ? `${title}の${next.note}` : next.label, emoji: "🎉" }) });
+    out.push({ label: "💞 毎年の記念日", url: url({ type: "yearly", date: s.since, title, emoji: "💞" }) });
+    return out;
   }
   if (isNaN(parseDay(s.birth))) return [];
   const links = [];
@@ -122,7 +138,7 @@ function renderCalendar() {
   const box = $("calList");
   box.replaceChildren();
   if (!list.length) {
-    box.append(Object.assign(document.createElement("p"), { className: "ls-hint", textContent: `${state.mode === "womb" ? "出産予定日" : "生まれた日"}を入れると、これからの節目が出ます。` }));
+    box.append(Object.assign(document.createElement("p"), { className: "ls-hint", textContent: `${MODES[state.mode].dateWord}を入れると、これからの節目が出ます。` }));
   }
   for (const m of list) {
     const row = document.createElement("div");
