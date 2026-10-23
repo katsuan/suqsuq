@@ -7,7 +7,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const XSS = "<img src=x onerror=alert(1)>";
+const XSS = "<img src=x onerror=alert(1)>"; // qcheck-ok: W8 外からの文字の見本
 const read = (f) => fs.readFileSync(path.join(__dirname, "..", f), "utf8");
 
 // core.js と calendar.js を、偽の localStorage・URL で読む
@@ -100,4 +100,38 @@ test("カレンダーのファイル：名前に改行やカンマが入って�
   const lines = ics.split("\r\n");
   assert.ok(lines.every((l) => !l.startsWith("ATTACH")));
   assert.ok(lines.some((l) => l.startsWith("SUMMARY:") && l.includes("\\n") && l.includes("\\,") && l.includes("\;")));
+});
+
+test("月の終わり・うるう年に生まれた子の「生後◯か月◯日」「◯さい」も、マイナスにならずカレンダーの節目とそろう", () => {
+  const { state, countLabel, milestoneList } = load({ stored: { birth: "2026-01-31" } });
+  const at = (day, fmt = "months") => {
+    state.day = day;
+    state.fmtBorn = fmt;
+    const L = countLabel();
+    return `${L.big}${L.unit}${L.small}`;
+  };
+  assert.equal(at("2026-02-27"), "28日目");
+  assert.equal(at("2026-02-28"), "1か月", "31日生まれの1か月は、2月の終わりの日（カレンダーの節目と同じ）");
+  assert.equal(at("2026-03-01"), "1か月1日");
+  assert.equal(at("2026-03-31"), "2か月");
+  state.day = "2026-01-31";
+  assert.equal(milestoneList().find((m) => m.label === "生後1か月").date, "2026-02-28");
+  state.birth = "2024-02-29";
+  assert.equal(at("2025-02-27", "age"), "11か月29日");
+  assert.equal(at("2025-02-28", "age"), "1さい");
+  assert.equal(at("2028-02-29", "age"), "4さい");
+  state.birth = "2026-05-15";
+  assert.equal(at("2026-06-14"), "31日目");
+  assert.equal(at("2026-06-15"), "1か月");
+  assert.equal(at("2027-07-20", "age"), "1さい2か月");
+});
+
+test("かぞく（KazoQ）のリンクの形：?due= ／ ?birth= だけでも受けとる", () => {
+  const due = load({ search: "?due=2027-03-01" });
+  assert.equal(due.fromLink, "出産予定日");
+  assert.equal(due.state.mode, "womb");
+  assert.equal(due.state.due, "2027-03-01");
+  const birth = load({ search: "?birth=2026-07-14" });
+  assert.equal(birth.state.mode, "born");
+  assert.equal(birth.state.birth, "2026-07-14");
 });

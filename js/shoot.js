@@ -43,8 +43,11 @@ function sizeStage() {
   fitStage();
 }
 
+// カメラを開く。続けて開きなおしたとき・待つあいだに閉じたときは、前のカメラを残さない（camToken）
+let camToken = 0;
 async function startCamera() {
   stopCamera();
+  const my = camToken;
   $("shootMsg").hidden = true;
   if (!navigator.mediaDevices?.getUserMedia) {
     showShootMsg("この画面ではカメラを使えません。🖼 で写真を選べます。");
@@ -52,20 +55,27 @@ async function startCamera() {
   }
   // 読みこみ中：カメラが映るまで、画面のまん中に「準備中…」
   showShootMsg("📷 カメラを準備中…");
+  let stream;
   try {
-    camStream = await navigator.mediaDevices.getUserMedia({
+    stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: state.facing, width: { ideal: 1920 }, height: { ideal: 1080 } },
       audio: false
     });
-    camVideo.srcObject = camStream;
-    await camVideo.play().catch(() => {});
-    $("shootMsg").hidden = true;
   } catch (err) {
-    camStream = null;
-    showShootMsg("カメラを使えませんでした。カメラの許可を確かめてね。🖼 で写真も選べます。");
+    if (my === camToken) showShootMsg("カメラを使えませんでした。カメラの許可を確かめてね。🖼 で写真も選べます。");
+    return;
   }
+  if (my !== camToken || $("shoot").hidden) {
+    stream.getTracks().forEach((t) => t.stop());
+    return;
+  }
+  camStream = stream;
+  camVideo.srcObject = camStream;
+  await camVideo.play().catch(() => {});
+  if (my === camToken) $("shootMsg").hidden = true;
 }
 function stopCamera() {
+  camToken += 1;
   camStream?.getTracks().forEach((t) => t.stop());
   camStream = null;
   camVideo.srcObject = null;
@@ -123,6 +133,7 @@ $("pickFile").addEventListener("change", () => {
   if (!file) return;
   const img = new Image();
   img.onload = () => {
+    if (picked?.src?.startsWith("blob:")) URL.revokeObjectURL(picked.src);
     picked = img;
     stopCamera();
     $("shootMsg").hidden = true;
@@ -183,7 +194,18 @@ function pickMimeType() {
   const types = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"];
   return types.find((t) => window.MediaRecorder?.isTypeSupported?.(t)) || "";
 }
+// 録りはじめ（マイクの許可を待つあいだ）の二度押しで、録画が2つ動かないように
+let recStarting = false;
 async function startRecording() {
+  if (recStarting || recorder) return;
+  recStarting = true;
+  try {
+    await beginRecording();
+  } finally {
+    recStarting = false;
+  }
+}
+async function beginRecording() {
   if (!window.MediaRecorder || !$("stage").captureStream) {
     toast("この画面では動画を録れません（写真はとれます）");
     return;
@@ -196,6 +218,12 @@ async function startRecording() {
     } catch {
       toast("マイクを使えないので、音なしで録ります");
     }
+  }
+  if ($("shoot").hidden) {
+    // 待つあいだに撮る画面を閉じた：マイクも止める
+    micStream?.getTracks().forEach((t) => t.stop());
+    micStream = null;
+    return;
   }
   const main = makeRecorder(stream, 8_000_000);
   recorder = main.rec;
@@ -391,6 +419,7 @@ function bindShoot() {
   );
   $("shutter").addEventListener("click", () => {
     if (countdown) return cancelCountdown(); // タイマーの途中で押したら、やめる
+    if (recStarting) return;
     if (recorder) return stopRecording();
     const go = state.kind === "photo" ? takePhoto : startRecording;
     if (state.timer) startCountdown(state.timer, go);

@@ -8,6 +8,13 @@ sizeStage();
 renderAll();
 fontsReady.then(renderAll);
 if (fromLink) save();
+// 開いたまま日付が変わって戻ってきたら、「きょう」の数えを描きなおす
+let shownDay = todayStr();
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden || shownDay === todayStr()) return;
+  shownDay = todayStr();
+  renderAll();
+});
 // Q キット（ui.js）は defer なので、読み終わってから知らせ・はじめての案内を出す
 document.addEventListener("DOMContentLoaded", () => {
   if (fromLink) toast(`リンクから${fromLink}を入れました`);

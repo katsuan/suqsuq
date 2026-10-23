@@ -8,12 +8,6 @@ const dayStr = (ms) => {
   const d = new Date(ms);
   return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
 };
-const addMonths = (ms, n) => {
-  const d = new Date(ms);
-  const y = d.getUTCFullYear(), m = d.getUTCMonth() + n, day = d.getUTCDate();
-  const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); // 31日生まれの「1か月」は、その月の終わりの日
-  return Date.UTC(y, m, Math.min(day, last));
-};
 
 // 節目の一覧（数える日から先のもの）。{ date: "2026-10-22", label: "生まれて100日", note: "お食い初め" }
 function milestoneList(s = state) {

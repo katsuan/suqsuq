@@ -138,21 +138,21 @@ const save = () => {
 };
 
 // ---- 日数の計算 ----
-// 年・月・日の差（生後◯か月◯日・◯さい◯か月）
+// n か月あとの日。31日生まれの「1か月」は、その月の終わりの日（カレンダーの節目と同じ数え方）
+const addMonths = (ms, n) => {
+  const d = new Date(ms);
+  const y = d.getUTCFullYear(), m = d.getUTCMonth() + n, day = d.getUTCDate();
+  const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  return Date.UTC(y, m, Math.min(day, last));
+};
+
+// 年・月・日の差（生後◯か月◯日・◯さい◯か月）。いちばん近い「◯か月の日」（addMonths）から何日たったか
 function ymd(from, to) {
   const a = new Date(from), b = new Date(to);
-  let y = b.getUTCFullYear() - a.getUTCFullYear();
-  let m = b.getUTCMonth() - a.getUTCMonth();
-  let d = b.getUTCDate() - a.getUTCDate();
-  if (d < 0) {
-    m -= 1;
-    d += new Date(Date.UTC(b.getUTCFullYear(), b.getUTCMonth(), 0)).getUTCDate(); // 前の月の日数
-  }
-  if (m < 0) {
-    y -= 1;
-    m += 12;
-  }
-  return { y, m, d };
+  let months = (b.getUTCFullYear() - a.getUTCFullYear()) * 12 + (b.getUTCMonth() - a.getUTCMonth());
+  if (addMonths(from, months) > to) months -= 1;
+  const d = Math.round((to - addMonths(from, months)) / DAY);
+  return { y: Math.floor(months / 12), m: months % 12, d };
 }
 
 // いまの設定で、写真に入れる文字のまとまりを作る。null は日付がまだないとき
