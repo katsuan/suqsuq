@@ -64,7 +64,10 @@ const loadStore = () => {
   }
 };
 // 外から来た文字（リンク・端末に残した中身）：文字だけにし、改行などの見えない文字を外して、長さを決める
-const cleanText = (v, max) => (typeof v === "string" ? v.replace(/[\u0000-\u001f\u007f\u2028\u2029]/g, " ").slice(0, max) : "");
+// 長さは文字で数える（絵文字を半分に切らない）
+const cleanText = (v, max) => (typeof v === "string" ? Array.from(v.replace(/[\u0000-\u001f\u007f\u2028\u2029]/g, " ")).slice(0, max).join("") : "");
+// HTML に入れる文字（innerHTML のとき）
+const escHtml = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 const cleanDay = (v) => (typeof v === "string" && !isNaN(parseDay(v)) ? v : "");
 const LOOK_DEFAULT = { tpl: "fuwari", color: "#e9735a", x: null, y: null, size: 1, showName: true, showDate: true, showStats: true, stamps: ["sparkle"], motion: "float" };
 // 文字の形（look）を決まった形にそろえる（形のちがう値は、はじめの値に）

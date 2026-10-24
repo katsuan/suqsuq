@@ -44,6 +44,9 @@ function milestoneList(s = state) {
     .map((m) => ({ ...m, date: dayStr(m.date), days: Math.round((m.date - from) / DAY) }));
 }
 
+// きょうから見て、つぎの節目（数える日をずらしていても、きょうから）
+const upcomingMilestone = (s) => milestoneList({ ...s, day: "" }).find((m) => m.days > 0);
+
 // くろのす（Qronos）で「あと何日？」を数えるページ。日付・名前を入れた状態で開く
 // おなかの中：出産予定日まで。生まれてから：つぎの節目まで・毎年の誕生日
 const QRONOS_URL = "https://katsuan.github.io/countdown/index.html";
@@ -58,7 +61,7 @@ function qronosLinks(s = state) {
   if (s.mode === "anniv") {
     if (isNaN(parseDay(s.since))) return [];
     const title = s.sinceTitle || "記念日";
-    const next = milestoneList({ ...s, day: "" }).find((m) => m.days > 0);
+    const next = upcomingMilestone(s);
     const out = [];
     if (next) out.push({ label: `🎉 ${next.note || next.label.replace(`${title}から`, "")}まで`, url: url({ type: "until", date: next.date, title: next.note ? `${title}の${next.note}` : next.label, emoji: "🎉" }) });
     out.push({ label: "💞 毎年の記念日", url: url({ type: "yearly", date: s.since, title, emoji: "💞" }) });
@@ -66,7 +69,7 @@ function qronosLinks(s = state) {
   }
   if (isNaN(parseDay(s.birth))) return [];
   const links = [];
-  const next = milestoneList({ ...s, day: "" }).find((m) => m.days > 0);
+  const next = upcomingMilestone(s);
   if (next) links.push({ label: `🎉 ${next.note || next.label}まで`, url: url({ type: "until", date: next.date, title: `${who}${next.note || next.label}`, emoji: "🎉" }) });
   links.push({ label: "🎂 毎年の誕生日", url: url({ type: "yearly", date: s.birth, title: `${who}誕生日`, emoji: "🎂" }) });
   return links;

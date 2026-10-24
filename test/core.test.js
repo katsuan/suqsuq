@@ -196,3 +196,11 @@ test("記念日から：リンク（?since=&title=）で受けとり、節目（
   const x = load({ search: `?since=2025-01-01&title=${encodeURIComponent(XSS + "あ".repeat(40))}` });
   assert.ok(x.state.sinceTitle.length <= 16);
 });
+
+test("リンクの名前が16文字目で絵文字にかかっても、絵文字を半分に切らない", () => {
+  const title = "あ".repeat(15) + "🎉おめでとう";
+  const { state } = load({ search: `?since=2025-01-01&title=${encodeURIComponent(title)}` });
+  assert.equal(state.sinceTitle, "あ".repeat(15) + "🎉");
+  const kid = load({ search: `?birth=2026-07-14&name=${encodeURIComponent("あ".repeat(15) + "👶ちゃん")}` });
+  assert.equal(kid.state.name, "あ".repeat(15) + "👶");
+});

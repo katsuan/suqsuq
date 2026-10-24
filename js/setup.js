@@ -235,10 +235,9 @@ function renderToday() {
     return;
   }
   $("cameraOpen").textContent = "📷 カメラを開く";
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
   box.innerHTML =
-    `<p class="today-main">${state.day ? "その日は" : "きょうは"} <span>${esc(L.top)}</span> <span class="nw"><b>${esc(L.big)}</b><span>${esc(L.unit)}</span></span> <span>${esc(L.small)}</span></p>` +
-    `<p class="ls-hint">${esc(nextMilestone())}</p>` +
+    `<p class="today-main">${state.day ? "その日は" : "きょうは"} <span>${escHtml(L.top)}</span> <span class="nw"><b>${escHtml(L.big)}</b><span>${escHtml(L.unit)}</span></span> <span>${escHtml(L.small)}</span></p>` +
+    `<p class="ls-hint">${escHtml(nextMilestone())}</p>` +
     qronosRow();
 }
 
@@ -246,10 +245,9 @@ function renderToday() {
 function qronosRow() {
   const links = qronosLinks();
   if (!links.length) return "";
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
   return (
     `<div class="qronos-links"><span class="ls-hint">⏳ くろのすで数える</span>` +
-    links.map((l) => `<a class="ls-chip is-small" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join("") +
+    links.map((l) => `<a class="ls-chip is-small" href="${escHtml(l.url)}" target="_blank" rel="noopener">${escHtml(l.label)}</a>`).join("") +
     "</div>"
   );
 }
