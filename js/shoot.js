@@ -340,7 +340,7 @@ $("share").addEventListener("click", async () => {
   const file = new File([lastResult.blob], lastResult.name, { type: lastResult.blob.type });
   try {
     await navigator.share({ files: [file] });
-    toast("✓ 共有できました");
+    toast(season("✓ 共有できました"));
   } catch (err) {
     if (err?.name !== "AbortError") toast("共有できませんでした。⬇️ で保存できます");
   }

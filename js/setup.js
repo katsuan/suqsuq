@@ -213,7 +213,7 @@ function renderDesign() {
       if (!name) return;
       state.myLooks.push({ name: name.slice(0, 12), look: JSON.parse(JSON.stringify(look)) });
       lookChanged();
-      toast("マイテンプレートに保存しました（長押しで消せます）");
+      toast(season("マイテンプレートに保存しました（長押しで消せます）"));
     }, "is-add"));
   }
 }

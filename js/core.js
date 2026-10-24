@@ -254,6 +254,8 @@ function nextMilestone(s = state) {
 }
 
 // 小さな知らせ（下に少し出して消える）。Q キットのトースト（新しいのが来たら前のは消える）
+// うれしい知らせに、季節の絵文字をときどき（Q キットの season.js。読めていなければそのまま）
+const season = (text) => (window.QSeason ? window.QSeason.decorate(text) : text);
 function toast(msg) {
   window.LineShareUI?.toast(msg, { ms: 2600 });
 }
