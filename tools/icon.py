@@ -120,7 +120,7 @@ def main():
     (ROOT / "logo.svg").write_text(logo, encoding="utf-8")
     BRAND.write_ogp(
         ROOT / "ogp.png", SHAPES, "すくすく", "SuQSuQ",
-        ["生まれて◯日・妊娠◯週を", "写真と動画にそのまま入れて残せる"],
+        ["生後◯日・妊娠◯週・記念日から◯日を", "写真や動画に入れて残せる"],
         copy="すくすく、まいにちが記念日",
     )
     print(f"アイコン・logo.svg（高さ 28px なら幅 {28 * ratio:.0f}px）・ogp.png を書き出しました")

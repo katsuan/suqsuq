@@ -1,7 +1,7 @@
 {
   "name": "すくすく",
   "short_name": "すくすく",
-  "description": "生まれて◯日・妊娠◯週を、写真と動画にそのまま入れて残せるツール（SuQSuQ）",
+  "description": "生後◯日・妊娠◯週・記念日から◯日を、写真や動画に入れて残せるツール（SuQSuQ）",
   "lang": "ja",
   "start_url": "./",
   "scope": "./",
