@@ -55,8 +55,10 @@
 ## ファイル
 
 - index.html・style.css：画面（部品はおくるんの Q キット `https://katsuan.github.io/line-share/shared/ui.css`。色は style.css の :root でピーチ）
-- js/：core.js 共通・state・日数の計算 ／ calendar.js 節目をカレンダーに ／ draw.js 描く（テンプレート・スタンプ・動き） ／ setup.js はじめの画面 ／ shoot.js 撮る画面 ／ main.js 最初の表示と毎フレームの描画
-- test/：端末に残した中身・リンクの読みこみ、日数の計算、カレンダーのファイルのテスト（`node --test test/`）
+- app.js：画面の入口（最初の表示と毎フレームの描画）
+- js/（index.html でこの順に読む）：count.js 日付と数え ／ store.js 端末に残す（suqsuq:state） ／ link.js リンクで日付を受けとる・くろのすへのリンク ／ ui.js 画面の小さな道具 ／ draw.js 描く（テンプレート・スタンプ・動き） ／ setup.js はじめの画面 ／ calendar.js 節目をカレンダーに ／ shoot.js 撮る画面
+- js/core.js・js/main.js：前の名前のファイル。前の index.html を覚えているブラウザのために、新しいファイルを読むだけ。2026-11-25 ごろ消す
+- test/：端末に残した中身・リンクの読みこみ、日数の計算、カレンダーのファイル、読みこみの印（?v=）のテスト（`node --test test/`）
 - 公開する前に `sh tools/stamp.sh`（JS・CSS・ロゴ・アイコンに版の番号 ?v=。付けないと、スマホが前のファイルを使いつづけて、直したのに変わらないことがある）
 - tools/icon.py：アイコン・ロゴ・OGP（おくるんの tools/brandkit.py。ピーチの角丸に、ふたばの芽が出た Q。横ロゴ logo.svg は「SuQ²」：ふたばの Q の右上に小さな 2）
 

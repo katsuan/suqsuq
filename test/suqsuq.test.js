@@ -24,7 +24,7 @@ function load({ stored = null, search = "" } = {}) {
     window: {}
   };
   vm.createContext(ctx);
-  vm.runInContext(read("js/core.js") + "\n" + read("js/calendar.js") + "\n;globalThis.__ = { state, fromLink, countLabel, milestoneList, icsFor, save, qronosLinks };", ctx);
+  vm.runInContext(["js/count.js", "js/store.js", "js/link.js", "js/calendar.js"].map(read).join("\n") + "\n;globalThis.__ = { state, fromLink, countLabel, milestoneList, icsFor, save, qronosLinks };", ctx);
   return { ...ctx.__, head, history: ctx.history, store };
 }
 
