@@ -24,7 +24,7 @@ function load({ stored = null, search = "" } = {}) {
     window: {}
   };
   vm.createContext(ctx);
-  vm.runInContext(["js/count.js", "js/store.js", "js/link.js", "js/calendar.js"].map(read).join("\n") + "\n;globalThis.__ = { state, fromLink, countLabel, milestoneList, icsFor, save, qronosLinks };", ctx);
+  vm.runInContext(["js/count.js", "js/store.js", "js/link.js", "js/calendar.js"].map(read).join("\n") + "\n;globalThis.__ = { state, fromLink, linkBefore, countLabel, milestoneList, icsFor, save, qronosLinks };", ctx);
   return { ...ctx.__, head, history: ctx.history, store };
 }
 
@@ -203,4 +203,20 @@ test("リンクの名前が16文字目で絵文字にかかっても、絵文字
   assert.equal(state.sinceTitle, "あ".repeat(15) + "🎉");
   const kid = load({ search: `?birth=2026-07-14&name=${encodeURIComponent("あ".repeat(15) + "👶ちゃん")}` });
   assert.equal(kid.state.name, "あ".repeat(15) + "👶");
+});
+
+test("リンクで前の日付を書きかえたときだけ、元に戻せるように前のものを覚える", () => {
+  // はじめての人（何も入れていない）には「元に戻す」を出さない
+  const fresh = load({ search: "?birth=2026-07-14" });
+  assert.equal(fresh.fromLink, "生まれた日");
+  assert.equal(fresh.linkBefore, null);
+  // 前にちがう子の日付を入れていた人には、前のものを覚えておく
+  const saved = JSON.stringify({ mode: "born", birth: "2024-01-02", name: "ひな" });
+  const over = load({ search: "?birth=2026-07-14&name=" + encodeURIComponent("はると"), stored: saved });
+  assert.equal(over.state.birth, "2026-07-14");
+  assert.equal(over.linkBefore.birth, "2024-01-02");
+  assert.equal(over.linkBefore.name, "ひな");
+  // 同じ日付・名前なら、覚えない
+  const same = load({ search: "?birth=2024-01-02&name=" + encodeURIComponent("ひな"), stored: saved });
+  assert.equal(same.linkBefore, null);
 });

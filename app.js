@@ -18,10 +18,21 @@ document.addEventListener("visibilitychange", () => {
 });
 // Q キット（ui.js）は defer なので、読み終わってから知らせ・はじめての案内を出す
 document.addEventListener("DOMContentLoaded", () => {
-  if (fromLink) toast(`リンクから${fromLink}を入れました`);
+  // リンクで前の日付・名前を書きかえたときは「元に戻す」で戻せる
+  if (fromLink && linkBefore) {
+    window.LineShareUI?.toast(`リンクから${fromLink}を入れました`, {
+      actionLabel: "元に戻す",
+      onAction: () => {
+        Object.assign(state, linkBefore);
+        for (const id of ["name", "birth", "due", "since", "sinceTitle"]) $(id).value = state[id];
+        save();
+        renderAll();
+      }
+    });
+  } else if (fromLink) toast(`リンクから${fromLink}を入れました`);
   window.LineShareUI?.firstTip(
     "suqsuq",
-    ["生まれた日（おなかの中なら出産予定日）を入れると、数字が入ります", "🎨 で文字の形を選べます。見本の文字は指で動かせます", "📷 で撮るか 🖼 で写真を選ぶと、数字入りで残せます。写真はこの端末の中だけで作ります"],
+    ["生まれた日・出産予定日・記念日のどれかを入れると、数字が入ります", "🎨 で文字の形を選べます。見本の文字は指で動かせます", "📷 で撮るか 🖼 で写真を選ぶと、数字入りで残せます。写真はこの端末の中だけで作ります"],
     document.querySelector(".ls-tabs")
   );
 });

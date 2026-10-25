@@ -5,8 +5,12 @@
 // リンクで日付を受けとる（くろのすの「すくすくで写真に入れる」など）：?birth=2026-07-14 ／ ?due=2027-03-01 ／ &name=はると
 //   記念日から：?since=2020-04-01&title=付き合った日
 // 受けとったら覚えて、アドレスからは消す（再読みこみで上書きしないように）
+// linkBefore：受けとる前に入れていたもの（ちがう日付・名前を上書きしたときだけ。トーストの「元に戻す」で戻す）
+let linkBefore = null;
 const fromLink = (() => {
   const q = new URLSearchParams(location.search);
+  const keys = ["mode", "birth", "due", "since", "sinceTitle", "name"];
+  const before = Object.fromEntries(keys.map((k) => [k, state[k]]));
   // 正しい日付（YYYY-MM-DD）か
   const ok = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "") && !isNaN(parseDay(v));
   let got = "";
@@ -25,6 +29,9 @@ const fromLink = (() => {
     got = state.sinceTitle || "記念日";
   }
   if (got && q.get("name")) state.name = cleanText(q.get("name"), 16).trim();
+  // 前に入れていた日付・名前を書きかえたときだけ、戻せるように覚えておく（はじめての人には出さない）
+  const hadOwn = ["birth", "due", "since", "name"].some((k) => before[k]);
+  if (got && hadOwn && keys.some((k) => before[k] !== state[k])) linkBefore = before;
   if (["birth", "due", "since", "title", "name"].some((k) => q.has(k))) {
     // 名前や誕生日が入ったリンクは、検索に出さない
     document.head.append(Object.assign(document.createElement("meta"), { name: "robots", content: "noindex" }));
