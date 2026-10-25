@@ -75,7 +75,7 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .tpl-chip { font-size: 15px; }
 .size-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-soft); }
 .size-row input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); }
-.ls-button.small { min-height: 34px; padding: 0 12px; font-size: 13px; }
+.ls-button.small { min-height: 44px; padding: 0 12px; font-size: 13px; } /* 小さく見えても、押せる高さは 44px（ux.md の C3） */
 .ls-chip.is-add { border-style: dashed; }
 /* ひとことの例：小さめのチップを、入力欄のすぐ下に */
 .example-chips { margin-top: -8px; gap: 6px; }
