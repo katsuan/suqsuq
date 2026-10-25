@@ -1,5 +1,6 @@
-// 描く：映像（または写真）→ 動くスタンプ → 文字（テンプレート）の順に、1枚のキャンバスへ。
+// すくすく：描く。映像（または写真）→ 動くスタンプ → 文字（テンプレート）の順に、1枚のキャンバスへ。
 // 見本（はじめの画面）・撮る画面・写真・動画で、同じ drawScene を使う（だから見たとおりに残る）。
+// 読まれるところ：index.html（js/ui.js のあと）。見本と撮る画面の描画で使う
 "use strict";
 
 // 画面の形（キャンバスの大きさ）。短いほうを 1080 に
@@ -33,12 +34,16 @@ const fontsReady = Promise.all(
   ].map((f) => document.fonts?.load(f, "生まれて100日目週さいか月Days").catch(() => null))
 );
 
+// 英数字だけの文字か（書体を選ぶのに使う）
 const isLatin = (s) => /^[\x20-\x7e]*$/.test(s);
+// 色を白に寄せた明るい色にする
 const lightColor = (hex) => {
   const n = parseInt(String(hex).replace("#", ""), 16) || 0;
   return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255 > 0.7;
 };
+// 少し行きすぎて戻る動き（0〜1 → 0〜1）
 const easeOutBack = (x) => 1 + 2.70158 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2);
+// 0〜1 に入れる
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 
 // ---- テンプレート ----
@@ -111,6 +116,7 @@ const TEMPLATES = [
     fixed: true
   }
 ];
+// id のテンプレート（なければはじめのもの）
 const tplOf = (id) => TEMPLATES.find((t) => t.id === id) || TEMPLATES[0];
 
 // ---- 動くスタンプ ----
@@ -138,6 +144,7 @@ const rnd = (i, k) => {
   return x - Math.floor(x);
 };
 
+// ハートの道を作る
 function heartPath(ctx, s) {
   ctx.beginPath();
   ctx.moveTo(0, s * 0.35);
@@ -145,6 +152,7 @@ function heartPath(ctx, s) {
   ctx.bezierCurveTo(s * 0.5, -s * 1.05, s * 1.1, -s * 0.35, 0, s * 0.35);
   ctx.closePath();
 }
+// 星の道を作る（points 個のとがり）
 function starPath(ctx, r, points, inner) {
   ctx.beginPath();
   for (let i = 0; i < points * 2; i++) {
@@ -168,6 +176,7 @@ function twinklePath(ctx, r) {
 // 下から上へ（または上から下へ）流れるつぶの、いまの位置（0〜1）
 const flow = (t, i, period) => (t / period + rnd(i, 3)) % 1;
 
+// 動くスタンプを1つ描く（t 秒の時点の形で）
 function drawStamp(ctx, id, W, H, t, color) {
   const u = Math.min(W, H) / 1080;
   ctx.save();
@@ -318,6 +327,7 @@ function fontFor(tpl, part, size, text) {
 
 // 行ごとの字のまとまり（文字・大きさ・幅）を作る
 function layoutRows(ctx, tpl, label, k) {
+  // 文字の1つのまとまり（上の行・数字など）の大きさと書体を決め、幅を測る
   const part = (name, text) => {
     const size = tpl.sz[name] * k;
     ctx.font = fontFor(tpl, name, size, text);
@@ -344,10 +354,12 @@ function layoutRows(ctx, tpl, label, k) {
 
 // まとまりの高さ（行の間を少しつめる）
 const LINE = { top: 1.25, big: 0.98, foot: 1.5 };
+// 文字の行をすべて重ねたときの高さ
 function rowsHeight(rows) {
   return rows.reduce((a, r) => a + r.h * (r.main ? LINE.big : r.parts[0].name === "top" ? LINE.top : LINE.foot), 0);
 }
 
+// 文字を1つ描く（ふちどり・影・動きつき）
 function drawText(ctx, tpl, part, text, x, y, color, k, t, wave) {
   ctx.font = part.font;
   const fill = tpl.fill(color, part.name);
@@ -420,6 +432,7 @@ function drawLabel(ctx, W, H, look, label, t, still) {
     // 飾りごと画面の中におさめる（はしに寄せても切れない）
     const hw = tpl.circle ? badgeR(bw, bh, k) + 4 * k : bw / 2 + 20 * k;
     const hh = tpl.circle ? hw : bh / 2 + 20 * k;
+    // 文字が枠からはみ出さない位置にする
     const fit = (v, half, size) => (half * 2 >= size ? size / 2 : Math.min(size - half, Math.max(half, v)));
     cx = fit(px * W, hw, W);
     cy = fit(py * H, hh, H);
@@ -544,6 +557,7 @@ function drawLabel(ctx, W, H, look, label, t, still) {
 // まるバッジの丸の半径：文字のまとまりの四すみが入る大きさ（対角線の半分）に少し余白
 const badgeR = (bw, bh, k) => Math.hypot(bw, bh) / 2 + 26 * k;
 
+// 角の丸い四角の道を作る
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);

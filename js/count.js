@@ -1,9 +1,11 @@
 // すくすく：日付と、写真に入れる数え（生まれて◯日・生後◯か月・妊娠◯週・記念日から◯日）を作る（画面には触らない）
 // ファイル（index.html でこの順に読む）：js/count.js 数える → js/store.js 端末に残す → js/link.js リンク → js/ui.js 画面の小さな道具
 //   → js/draw.js 描く → js/setup.js はじめの画面 → js/calendar.js 節目をカレンダーに → js/shoot.js 撮る画面 → app.js はじめに一度だけ
+// 読まれるところ：index.html（js/ の部品のいちばん先）。テストからも読む
 "use strict";
 
 const DAY = 86400000;
+// 2けたにそろえる
 const pad2 = (n) => String(n).padStart(2, "0");
 // "2026-10-22" ⇄ 日付（時差でずれないよう、UTC の 0 時で扱う）
 const parseDay = (s) => {
@@ -12,10 +14,12 @@ const parseDay = (s) => {
   const t = Date.UTC(+m[1], +m[2] - 1, +m[3]);
   return new Date(t).getUTCDate() === +m[3] && new Date(t).getUTCMonth() === +m[2] - 1 ? t : NaN; // 2027-13-99 のような日は読まない
 };
+// きょうの日付（"2026-10-22"。端末の時刻で）
 const todayStr = () => {
   const d = new Date();
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 };
+// "2026-10-22" を "2026.10.22" にする（空ならそのまま）
 const dotDay = (s) => (s ? s.replace(/-/g, ".") : "");
 
 // 表示の選び方（表示のチップ）。big が大きな数字、unit がそのとなり、small がさらに小さく
@@ -76,6 +80,7 @@ function statsText(s = state) {
   const l = Number(String(s.bLength).replace(/[^\d.]/g, ""));
   return [w ? `${Math.round(w).toLocaleString("ja-JP")}g` : "", l ? `${l}cm` : "", s.bTime ? `${s.bTime.replace(/^0(?=\d)/, "")} 生まれ` : ""].filter(Boolean).join(" ・ ");
 }
+// 数え（上の小さな行・大きな数字・単位・下の行）を作る。日付がないときは null
 function baseLabel(s) {
   const dayStr = s.day || todayStr();
   const day = parseDay(dayStr);

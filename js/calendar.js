@@ -1,9 +1,11 @@
-// 節目をカレンダーに：これからの節目（100日・ハーフバースデー・妊娠◯週など）を、
+// すくすく：節目をカレンダーに。これからの節目（100日・ハーフバースデー・妊娠◯週など）を、
 // まとめてカレンダーのファイル（.ics。お知らせつき）に、または1件ずつ Google カレンダーの予定作成画面に。
 // GitHub Pages だけではお知らせ（push）を送れないので、カレンダーのお知らせで知らせる（作りはくろのすの calendarUrl・icsText と同じ）。
+// 読まれるところ：index.html（js/setup.js のあと）。テストからも読む
 "use strict";
 
 const PAGE_URL = "https://katsuan.github.io/suqsuq/";
+// UTC の時刻（ミリ秒）を "2026-10-22" の形にする
 const dayStr = (ms) => {
   const d = new Date(ms);
   return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
@@ -16,6 +18,7 @@ function milestoneList(s = state) {
   if (s.mode === "womb") {
     const due = parseDay(s.due);
     if (isNaN(due)) return [];
+    // 妊娠 w 週0日の日
     const weekDay = (w) => due - (280 - w * 7) * DAY;
     const notes = { 16: "安定期のころ", 20: "折り返し", 28: "妊娠後期", 36: "臨月", 37: "正期産", 40: "出産予定日" };
     for (let w = 4; w <= 41; w++) {
@@ -26,6 +29,7 @@ function milestoneList(s = state) {
     const since = parseDay(s.since);
     if (isNaN(since)) return [];
     const title = s.sinceTitle || "記念日";
+    // はじまりの日から n 日目の日
     const nth = (n) => since + (n - (s.dayOne ? 1 : 0)) * DAY;
     for (const n of [100, 200, 300, 500, 1000, 2000, 3000, 5000, 10000]) list.push({ date: nth(n), label: `${title}から${n}日`, note: "" });
     for (let y = 1; y <= 10; y++) list.push({ date: addMonths(since, y * 12), label: `${title}から${y}年`, note: `${y}周年` });
@@ -44,9 +48,13 @@ function milestoneList(s = state) {
     .map((m) => ({ ...m, date: dayStr(m.date), days: Math.round((m.date - from) / DAY) }));
 }
 
+// カレンダーの予定の名前（「🌱 はると 生まれて100日（お食い初め）」）
 const eventTitle = (m, s = state) => `🌱 ${s.name ? s.name + " " : ""}${m.label}${m.note ? `（${m.note}）` : ""}`;
+// カレンダーの予定のメモ（すくすくへのリンク）
 const eventDetails = () => `すくすくで、きょうの写真を撮ろう\n${PAGE_URL}`;
+// 日付を数字だけにする（2026-10-22 → 20261022）
 const compact = (d) => d.replace(/-/g, "");
+// 次の日（数字だけの形）。終日の予定の終わりに使う
 const nextDay = (d) => compact(dayStr(parseDay(d) + DAY));
 
 // Google カレンダーの予定作成画面（終日の予定。お知らせは Google カレンダーの決まりのもの）
@@ -64,8 +72,10 @@ const REMINDS = [
 
 // まとめたカレンダーのファイル（.ics）。iPhone は開くと「すべてを追加」、Android・パソコンはカレンダーに読みこむ
 function icsFor(list, s = state) {
+  // カレンダーのファイルに入れる文字（\ ; , と改行を書きかえる）
   const esc = (t) => String(t).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n|\r/g, "\\n");
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  // お知らせの時間（決めた「当日の朝」などの、0 時からのずれ）
   const trigger = (REMINDS.find((r) => r.id === s.remind) || REMINDS[0]).trigger;
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//katsuan//suqsuq//JA", "CALSCALE:GREGORIAN", "X-WR-CALNAME:すくすく"];
   for (const m of list) {
@@ -88,6 +98,7 @@ function icsFor(list, s = state) {
   return lines.join("\r\n");
 }
 
+// 節目のカレンダーのファイル（.ics）をダウンロードする
 function downloadIcs(list) {
   const blob = new Blob([icsFor(list)], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -100,8 +111,10 @@ function downloadIcs(list) {
 
 // ---- 画面（はじめの画面の「🔔 節目をカレンダーに」） ----
 const calOff = new Set(); // 入れないことにした節目（日付＋名前）
+// 節目を見分ける名前（日付＋名前）
 const calKey = (m) => `${m.date}|${m.label}`;
 
+// 「🔔 節目をカレンダーに」の一覧とお知らせの時間を描く
 function renderCalendar() {
   const list = milestoneList();
   $("calMeta").textContent = list.length ? `${list.length}件` : "";
@@ -145,12 +158,14 @@ function renderCalendar() {
   }
   renderCalCount();
 }
+// 入れる節目の数と、まとめて入れるボタンを描く
 function renderCalCount() {
   const n = milestoneList().filter((m) => !calOff.has(calKey(m))).length;
   $("calIcs").disabled = n === 0;
   $("calIcs").textContent = `📥 ${n}件をまとめてカレンダーに入れる`;
 }
 
+// 「🔔 節目をカレンダーに」のボタン・チェックをつなぐ（はじめに一度）
 function bindCalendar() {
   $("calIcs").addEventListener("click", () => {
     const list = milestoneList().filter((m) => !calOff.has(calKey(m)));

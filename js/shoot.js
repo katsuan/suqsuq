@@ -1,5 +1,6 @@
-// 撮る画面：カメラの映像（または選んだ写真）に文字・スタンプを重ねて、写真か動画にする。
+// すくすく：撮る画面。カメラの映像（または選んだ写真）に文字・スタンプを重ねて、写真か動画にする。
 // 写真：同じ絵を大きなキャンバスに止まった形で描いて画像に。動画：表示しているキャンバス（＋音）を MediaRecorder で録る。
+// 読まれるところ：index.html（js/calendar.js のあと）
 "use strict";
 
 const camVideo = document.createElement("video");
@@ -17,7 +18,9 @@ let micStream = null;
 let wakeLock = null;
 let lastResult = null; // { blob, name, url }
 
+// いま描く映像（選んだ写真か、カメラ。なければ null）
 const source = () => picked || (camStream ? camVideo : null);
+// 左右を反転して見せるか（自分を撮るカメラのとき）
 const mirrored = () => !picked && state.facing === "user";
 
 // 映像を、上下のボタンのあいだの欄に収める（縦横の比はそのまま）
@@ -34,6 +37,7 @@ function fitStage() {
 window.addEventListener("resize", fitStage);
 window.visualViewport?.addEventListener("resize", fitStage);
 
+// 撮るキャンバスを、いまの画面の形（9:16 など）の大きさにする
 function sizeStage() {
   const [w, h] = ASPECTS[state.aspect];
   $("stage").width = w;
@@ -45,6 +49,7 @@ function sizeStage() {
 
 // カメラを開く。続けて開きなおしたとき・待つあいだに閉じたときは、前のカメラを残さない（camToken）
 let camToken = 0;
+// カメラを開く。続けて開きなおしたとき・待つあいだに閉じたときは、前のカメラを残さない
 async function startCamera() {
   stopCamera();
   const my = camToken;
@@ -74,17 +79,20 @@ async function startCamera() {
   await camVideo.play().catch(() => {});
   if (my === camToken) $("shootMsg").hidden = true;
 }
+// カメラを止める（待っているカメラも、あとで止まるようにする）
 function stopCamera() {
   camToken += 1;
   camStream?.getTracks().forEach((t) => t.stop());
   camStream = null;
   camVideo.srcObject = null;
 }
+// 撮る画面のまん中に知らせを出す
 function showShootMsg(text) {
   $("shootMsg").textContent = text;
   $("shootMsg").hidden = false;
 }
 
+// 撮る画面を開く
 function openShoot() {
   $("setup").hidden = true;
   $("setupBar").hidden = true;
@@ -108,6 +116,7 @@ function openShoot() {
     }
   } catch {}
 }
+// 撮る画面を閉じて、はじめの画面に戻る（録画中は閉じない）
 function closeShoot() {
   if (recorder) return;
   cancelCountdown();
@@ -144,6 +153,7 @@ $("pickFile").addEventListener("change", () => {
   img.src = URL.createObjectURL(file);
 });
 
+// 写真・動画の切りかえと、まわりのボタンを描く
 function renderKind() {
   document.querySelectorAll("[data-kind]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.kind === state.kind)));
   $("shutter").classList.toggle("is-video", state.kind === "video");
@@ -159,6 +169,7 @@ function fileName(ext, suffix = "") {
   const tag = L ? `${L.big}${L.unit}${L.small}`.replace(/\s/g, "") : "";
   return `suqsuq${state.name ? "-" + state.name : ""}${tag ? "-" + tag : ""}-${(state.day || todayStr()).replace(/-/g, "")}${suffix ? "-" + suffix : ""}.${ext}`;
 }
+// 写真を撮る（文字・スタンプ入りと、設定しだいで加工なしも）
 function takePhoto() {
   const [w, h] = ASPECTS[state.aspect];
   const c = document.createElement("canvas");
@@ -168,6 +179,7 @@ function takePhoto() {
   const raw = rawPhotoCanvas(); // 文字を描く前の、同じ瞬間の映像
   flash();
   navigator.vibrate?.(30); // Android：撮った手ごたえ
+  // キャンバスを JPEG にする（なければ null）
   const toBlob = (cv) => new Promise((ok) => (cv ? cv.toBlob(ok, "image/jpeg", 0.95) : ok(null)));
   Promise.all([toBlob(c), toBlob(raw)]).then(([blob, rawBlob]) => {
     if (blob) showResult(blob, fileName("jpg"), rawBlob && { blob: rawBlob, name: fileName("jpg", "raw") });
@@ -182,6 +194,7 @@ function rawPhotoCanvas() {
   c.getContext("2d").drawImage(camVideo, 0, 0);
   return c;
 }
+// 撮ったときに画面を白く光らせる
 function flash() {
   const st = $("stage");
   st.classList.remove("is-flash");
@@ -196,6 +209,7 @@ function pickMimeType() {
 }
 // 録りはじめ（マイクの許可を待つあいだ）の二度押しで、録画が2つ動かないように
 let recStarting = false;
+// 録画をはじめる（マイクの許可を待つあいだの二度押しで、2つ動かないように）
 async function startRecording() {
   if (recStarting || recorder) return;
   recStarting = true;
@@ -205,6 +219,7 @@ async function startRecording() {
     recStarting = false;
   }
 }
+// 録画をはじめる中身（キャンバスとマイクの音。設定しだいで加工なしも）
 async function beginRecording() {
   if (!window.MediaRecorder || !$("stage").captureStream) {
     toast("この画面では動画を録れません（写真はとれます）");
@@ -241,6 +256,7 @@ async function beginRecording() {
   Promise.all([main.done, raw ? raw.done : null]).then(([blob, rawBlob]) => {
     recorder = rawRecorder = null;
     renderRecording();
+    // 動画のファイルの拡張子（mp4 か webm）
     const ext = (b) => (b.type.includes("mp4") ? "mp4" : "webm");
     showResult(blob, fileName(ext(blob)), rawBlob && { blob: rawBlob, name: fileName(ext(rawBlob), "raw") });
   });
@@ -263,6 +279,7 @@ function makeRecorder(stream, bits) {
   const done = new Promise((ok) => rec.addEventListener("stop", () => ok(new Blob(parts, { type: rec.mimeType || parts[0]?.type || "video/webm" }))));
   return { rec, done };
 }
+// 録画を止める（止まると、できた動画を出す）
 function stopRecording() {
   if (recorder?.state === "inactive") return;
   recorder?.stop();
@@ -270,6 +287,7 @@ function stopRecording() {
   wakeLock?.release?.().catch(() => {});
   wakeLock = null;
 }
+// 録画中かどうかで、ボタンと時間の表示を切りかえる
 function renderRecording() {
   const on = !!recorder;
   $("shoot").classList.toggle("is-recording", on);
@@ -280,10 +298,12 @@ function renderRecording() {
 
 // ---- セルフタイマー ----
 let countdown = 0;
+// セルフタイマーのボタンの表示（なし・3秒・10秒）
 function renderTimer() {
   $("timerBtn").querySelector("small").textContent = state.timer ? `${state.timer}秒` : "なし";
   $("timerBtn").classList.toggle("is-on", !!state.timer);
 }
+// sec 秒数えてから go を動かす
 function startCountdown(sec, go) {
   let left = sec;
   $("countdown").textContent = left;
@@ -296,6 +316,7 @@ function startCountdown(sec, go) {
     go();
   }, 1000);
 }
+// セルフタイマーの数えをやめる
 function cancelCountdown() {
   clearInterval(countdown);
   countdown = 0;
@@ -305,6 +326,7 @@ function cancelCountdown() {
 
 // ---- できた写真・動画 ----
 let lastRaw = null; // 加工なしの元の写真・動画 { blob, name }
+// できた写真・動画を見せて、保存・共有のボタンを出す
 function showResult(blob, name, raw = null) {
   if (lastResult) URL.revokeObjectURL(lastResult.url);
   lastRaw = raw;
@@ -378,6 +400,7 @@ function openDesign() {
   $("shoot").classList.add("is-designing");
   requestAnimationFrame(fitStage);
 }
+// 撮る画面の「🎨 文字の形」のシートを閉じて、欄をはじめの画面に戻す
 function closeDesign() {
   if ($("designSheet").hidden) return;
   $("designSheet").hidden = true;
@@ -386,6 +409,7 @@ function closeDesign() {
   requestAnimationFrame(fitStage);
 }
 
+// 撮る画面のボタンをつなぐ（はじめに一度）
 function bindShoot() {
   $("cameraOpen").addEventListener("click", () => {
     if (needDate()) return;

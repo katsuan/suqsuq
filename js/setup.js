@@ -1,7 +1,9 @@
-// はじめの画面：なまえ・日付・表示の選び方・文字の形（テンプレート・色・大きさ・スタンプ・動き・マイテンプレート）と見本。
+// すくすく：はじめの画面。なまえ・日付・表示の選び方・文字の形（テンプレート・色・大きさ・スタンプ・動き・マイテンプレート）と見本。
 // 文字の形の欄（#design）は、撮る画面でも下から出るシートに移して使う。
+// 読まれるところ：index.html（js/draw.js のあと）
 "use strict";
 
+// 押すと onClick するチップ（ボタン）を作る
 const chip = (label, pressed, onClick, extra = "") => {
   const b = document.createElement("button");
   b.type = "button";
@@ -48,12 +50,14 @@ const RECIPES = {
     { label: "🌱 つづけてきた", tpl: "hand", color: "#5cb85c", stamps: ["sparkle", "star"], motion: "wave", memo: "つづけてきたね" }
   ]
 };
+// ひとことを入れる（欄と例のチップも合わせる）
 function setMemo(text) {
   state.memo = text;
   $("memo").value = text;
   save();
   renderExamples();
 }
+// ひとことの例とおすすめの組み合わせのチップを描く
 function renderExamples() {
   const memo = $("memoChips");
   memo.replaceChildren();
@@ -72,6 +76,7 @@ function renderExamples() {
   }
 }
 
+// 表示の選び方（100 Days・生後◯か月 など）のチップを描く
 function renderFormats() {
   const box = $("fmtChips");
   box.replaceChildren();
@@ -85,6 +90,7 @@ function renderFormats() {
   }
 }
 
+// 文字の形の欄（テンプレート・色・スタンプ・動き・マイテンプレート）を描く
 function renderDesign() {
   const look = state.look;
   // テンプレート：そのテンプレートの字で名前を出す
@@ -187,6 +193,7 @@ function renderDesign() {
       lookChanged();
       toast(`「${m.name}」の形にしました`);
     });
+    // マイテンプレートを消して「元に戻す」を出す（長押し・右クリック）
     const del = (e) => {
       e.preventDefault();
       clearTimeout(hold);
@@ -270,12 +277,14 @@ function needDate() {
   return true;
 }
 
+// 数えかたのタブ（生まれて・おなかの中・記念日）と、それにだけ出す欄を切りかえる
 function renderMode() {
   document.querySelectorAll("[data-mode]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.mode === state.mode)));
   // data-mode-only="born anniv" のように、空白で区切って複数の数えかたで出せる
   document.querySelectorAll("[data-mode-only]").forEach((el) => (el.hidden = !el.dataset.modeOnly.split(" ").includes(state.mode)));
 }
 
+// はじめの画面をまとめて描きなおす
 function renderAll() {
   renderMode();
   renderFormats();
@@ -292,6 +301,7 @@ function renderAll() {
 function attachDrag(canvas, getBox, onStart) {
   const pts = new Map();
   let drag = null, pinch = null;
+  // 指の位置を、キャンバスの中の 0〜1 の位置にする
   const toCanvas = (e) => {
     const r = canvas.getBoundingClientRect();
     return [((e.clientX - r.left) / r.width) * canvas.width, ((e.clientY - r.top) / r.height) * canvas.height];
@@ -331,6 +341,7 @@ function attachDrag(canvas, getBox, onStart) {
     state.look.x = Math.min(0.97, Math.max(0.03, drag.px + (x - drag.x) / canvas.width));
     state.look.y = Math.min(0.97, Math.max(0.03, drag.py + (y - drag.y) / canvas.height));
   });
+  // 指をはなしたとき：動かした位置・大きさを端末に残す（2本指の拡大も終わる）
   const end = (e) => {
     pts.delete(e.pointerId);
     if (drag || pinch) save();
@@ -343,6 +354,7 @@ function attachDrag(canvas, getBox, onStart) {
 
 // ---- 見本（はじめの画面）。短いほうを 540 にして軽く ----
 let previewBox = null;
+// 見本のキャンバスを、いまの画面の形（9:16 など）の大きさにする
 function sizePreview() {
   const [w, h] = ASPECTS[state.aspect];
   $("preview").width = w / 2;
@@ -351,8 +363,10 @@ function sizePreview() {
 
 // 動き（カウントアップ・ぽよん）を、はじめから見せなおす
 let motionStart = performance.now();
+// 文字の動き（ぽよん・カウントアップ）を、はじめから動かしなおす
 const restartMotion = () => (motionStart = performance.now());
 
+// はじめの画面のボタン・欄をつなぐ（はじめに一度）
 function bindSetup() {
   document.querySelectorAll("[data-mode]").forEach((b) =>
     b.addEventListener("click", () => {

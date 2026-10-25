@@ -1,4 +1,5 @@
 // すくすく：リンクの受け渡し。リンクで日付を受けとる（?birth= ／ ?due= ／ ?since=&title= ／ &name=）と、くろのすを開くリンク
+// 読まれるところ：index.html（js/store.js のあと）。テストからも読む
 "use strict";
 
 // リンクで日付を受けとる（くろのすの「すくすくで写真に入れる」など）：?birth=2026-07-14 ／ ?due=2027-03-01 ／ &name=はると
@@ -6,6 +7,7 @@
 // 受けとったら覚えて、アドレスからは消す（再読みこみで上書きしないように）
 const fromLink = (() => {
   const q = new URLSearchParams(location.search);
+  // 正しい日付（YYYY-MM-DD）か
   const ok = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || "") && !isNaN(parseDay(v));
   let got = "";
   if (ok(q.get("birth"))) {
@@ -37,8 +39,10 @@ const upcomingMilestone = (s) => milestoneList({ ...s, day: "" }).find((m) => m.
 // くろのす（Qronos）で「あと何日？」を数えるページ。日付・名前を入れた状態で開く
 // おなかの中：出産予定日まで。生まれてから：つぎの節目まで・毎年の誕生日
 const QRONOS_URL = "https://katsuan.github.io/countdown/index.html";
+// くろのすで「あと何日？」を数えるページのリンク（{ label, url } の並び）。日付がなければ空
 function qronosLinks(s = state) {
   const who = s.name ? `${s.name}の` : "";
+  // くろのすのページの URL（色はすくすくに近い sunset）
   const url = (q) => `${QRONOS_URL}?${new URLSearchParams({ ...q, color: "sunset" })}`;
   if (s.mode === "womb") {
     const due = parseDay(s.due);

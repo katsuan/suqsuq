@@ -1,7 +1,9 @@
 // すくすく：覚えておくこと（state）。この端末の localStorage（suqsuq:state）に残す。形のちがう値は、はじめの値にそろえる
+// 読まれるところ：index.html（js/count.js のあと）。テストからも読む
 "use strict";
 
 const STORE_KEY = "suqsuq:state";
+// 端末に残した中身を読む（読めないときは空）
 const loadStore = () => {
   try {
     return JSON.parse(localStorage.getItem(STORE_KEY)) || {};
@@ -12,11 +14,13 @@ const loadStore = () => {
 // 外から来た文字（リンク・端末に残した中身）：文字だけにし、改行などの見えない文字を外して、長さを決める
 // 長さは文字で数える（絵文字を半分に切らない）
 const cleanText = (v, max) => (typeof v === "string" ? Array.from(v.replace(/[\u0000-\u001f\u007f\u2028\u2029]/g, " ")).slice(0, max).join("") : "");
+// 正しい日付ならそのまま、ちがえば空
 const cleanDay = (v) => (typeof v === "string" && !isNaN(parseDay(v)) ? v : "");
 const LOOK_DEFAULT = { tpl: "fuwari", color: "#e9735a", x: null, y: null, size: 1, showName: true, showDate: true, showStats: true, stamps: ["sparkle"], motion: "float" };
 // 文字の形（look）を決まった形にそろえる（形のちがう値は、はじめの値に）
 function cleanLook(raw) {
   const l = raw && typeof raw === "object" ? raw : {};
+  // 0〜1 の位置ならそのまま、ちがえば null
   const pos = (v) => (typeof v === "number" && v >= 0 && v <= 1 ? v : null);
   const x = pos(l.x), y = pos(l.y);
   return {
@@ -65,6 +69,7 @@ const state = {
   remind: ["morning", "eve", "none"].includes(saved.remind) ? saved.remind : "morning", // 節目のお知らせ（js/calendar.js の REMINDS）
   calWeekly: saved.calWeekly === true // おなかの中：毎週の◯週もカレンダーに
 };
+// いまの state を端末に残す（数える日は残さない）
 const save = () => {
   try {
     const { day, ...rest } = state;
