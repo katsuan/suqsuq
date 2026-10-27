@@ -6,6 +6,7 @@
 set -e
 cd "$(dirname "$0")/.."
 python3 ../q-oqrn/tools/qstamp.py index.html
-V=$(date -u +%Y%m%d%H%M)
+# ロゴ・アイコンも、qstamp.py が JS・CSS に付けたのと同じ版にそろえる（前より大きい値を qstamp.py が決める）
+V=$(grep -oE 'app\.js\?v=[0-9]+' index.html | head -1 | sed 's/.*v=//')
 sed -i '' -E "s#(src|href)=\"(logo\.svg|icon\.svg|icon-32\.png|apple-touch-icon\.png)(\?v=[0-9]+)?\"#\1=\"\2?v=$V\"#g" index.html
 echo "ロゴ・アイコン: ?v=$V"
