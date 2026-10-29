@@ -90,10 +90,22 @@ function renderFormats() {
   }
 }
 
-// 文字の形の欄（テンプレート・色・スタンプ・動き・マイテンプレート）を描く
+// 文字の形の欄（テンプレート・色・大きさ・いっしょに入れるもの・スタンプ・動き・マイテンプレート）を描く
 function renderDesign() {
   const look = state.look;
-  // テンプレート：そのテンプレートの字で名前を出す
+  renderTemplateChips(look);
+  renderColorChips(look);
+  $("size").value = look.size;
+  $("size").disabled = tplOf(look.tpl).fixed;
+  $("center").disabled = tplOf(look.tpl).fixed;
+  renderExtraChips(look);
+  renderStampChips(look);
+  renderMotionChips(look);
+  renderMyLooks(look);
+}
+
+// テンプレートのチップ（そのテンプレートの字で名前を出す）
+function renderTemplateChips(look) {
   const tpls = $("tplChips");
   tpls.replaceChildren();
   for (const t of TEMPLATES) {
@@ -106,6 +118,10 @@ function renderDesign() {
     b.style.fontWeight = t.weight;
     tpls.append(b);
   }
+}
+
+// 色のチップ（8色と、端末の色えらびで選ぶ好きな色）
+function renderColorChips(look) {
   const colors = $("colorChips");
   colors.replaceChildren();
   for (const c of LOOK_COLORS) {
@@ -121,7 +137,7 @@ function renderDesign() {
     });
     colors.append(b);
   }
-  // カスタム：好きな色（色見本を押すと、端末の色えらびが開く）
+  // 好きな色：色見本を押すと、端末の色えらびが開く
   const custom = !LOOK_COLORS.includes(look.color);
   const cb = document.createElement("label");
   cb.className = `ls-swatch is-custom${custom ? " is-selected" : ""}`;
@@ -139,10 +155,10 @@ function renderDesign() {
   picker.addEventListener("change", lookChanged);
   cb.append(picker);
   colors.append(cb);
-  $("size").value = look.size;
-  $("size").disabled = tplOf(look.tpl).fixed;
-  $("center").disabled = tplOf(look.tpl).fixed;
+}
 
+// いっしょに入れるもの（なまえ・日付・うまれたときの記録）のチップ
+function renderExtraChips(look) {
   const extra = $("extraChips");
   extra.replaceChildren(
     chip("なまえ", look.showName, () => {
@@ -160,7 +176,10 @@ function renderDesign() {
       lookChanged();
     }));
   }
+}
 
+// 動くスタンプのチップ（いくつでも選べる）
+function renderStampChips(look) {
   const stamps = $("stampChips");
   stamps.replaceChildren();
   for (const s of STAMPS) {
@@ -170,6 +189,10 @@ function renderDesign() {
       lookChanged();
     }));
   }
+}
+
+// 文字の動きのチップ
+function renderMotionChips(look) {
   const motions = $("motionChips");
   motions.replaceChildren();
   for (const m of MOTIONS) {
@@ -179,8 +202,10 @@ function renderDesign() {
       lookChanged();
     }));
   }
+}
 
-  // マイテンプレート：押すとその形に。長押し（右クリック）で消す
+// マイテンプレートのチップ：押すとその形に。長押し（右クリック）で消す。8つまで「＋ いまの形を保存」
+function renderMyLooks(look) {
   const my = $("myChips");
   my.replaceChildren();
   state.myLooks.forEach((m, i) => {

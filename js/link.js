@@ -7,6 +7,7 @@
 // 受けとったら覚えて、アドレスからは消す（再読みこみで上書きしないように）
 // linkBefore：受けとる前に入れていたもの（ちがう日付・名前を上書きしたときだけ。トーストの「元に戻す」で戻す）
 let linkBefore = null;
+// リンクを読んで state に入れ、受けとったものの名前（「生まれた日」など。なければ ""）を返す
 const fromLink = (() => {
   const q = new URLSearchParams(location.search);
   const keys = ["mode", "birth", "due", "since", "sinceTitle", "name"];
