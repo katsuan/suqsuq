@@ -147,6 +147,7 @@ input.date::-webkit-date-and-time-value { text-align: left; }
   :root[data-ls-dark="auto"] body { background: var(--ls-bg); }
   :root[data-ls-dark="auto"] .design-tabs button[aria-selected="true"] { background: var(--ls-surface); }
   :root[data-ls-dark="auto"] .preview-wrap { background: var(--ls-surface-sub); }
+  :root[data-ls-dark="auto"] .cal-g { background: var(--ls-surface); }
   :root[data-ls-dark="auto"] .design-sheet,
   :root[data-ls-dark="auto"] .result-card { background: var(--ls-surface); }
   /* カメラの上のボタンは白地に暗い字のまま */
