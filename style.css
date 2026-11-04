@@ -161,8 +161,6 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .today-main .nw { white-space: nowrap; }
 
 /* 線アイコン（Q キットの .ls-icon）と字の間。タブのアイコンと字の並べ方は Q キット（横に並べて、まん中に。間は 8px） */
-/* 3つのタブは、字の長さにかかわらず同じ幅に */
-.ls-tabs { grid-auto-columns: minmax(0, 1fr); }
 /* 狭い画面（320px など）では横に入らないので、アイコンを字の上にのせる */
 @media (max-width: 359px) {
   .ls-tab:has(> .ls-icon) { flex-direction: column; gap: 2px; padding-block: var(--ls-space-xs); }
