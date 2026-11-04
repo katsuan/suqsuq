@@ -160,8 +160,13 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 /* 数字と単位（480日目）は1つのまとまりで折り返す */
 .today-main .nw { white-space: nowrap; }
 
-/* 線アイコン（Q キットの .ls-icon）と字の間。タブは前の絵文字と同じく、アイコンを字の上に */
-.ls-tab .ls-icon { display: block; margin: 0 auto 2px; }
+/* 線アイコン（Q キットの .ls-icon）と字の間。タブのアイコンと字の並べ方は Q キット（横に並べて、まん中に。間は 8px） */
+/* 3つのタブは、字の長さにかかわらず同じ幅に */
+.ls-tabs { grid-auto-columns: minmax(0, 1fr); }
+/* 狭い画面（320px など）では横に入らないので、アイコンを字の上にのせる */
+@media (max-width: 359px) {
+  .ls-tab:has(> .ls-icon) { flex-direction: column; gap: 2px; padding-block: var(--ls-space-xs); }
+}
 .ls-panel-title .ls-icon, .sheet-title .ls-icon, .qronos-links .ls-hint .ls-icon, .day-badge .ls-icon { margin-right: var(--ls-space-xs); }
 .design-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: var(--ls-space-xs); }
 .design-tabs .ls-icon { width: 16px; height: 16px; }
