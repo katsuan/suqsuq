@@ -55,11 +55,11 @@ async function startCamera() {
   const my = camToken;
   $("shootMsg").hidden = true;
   if (!navigator.mediaDevices?.getUserMedia) {
-    showShootMsg("この画面ではカメラを使えません。🖼 で写真を選べます。");
+    showShootMsg("この画面ではカメラを使えません。写真のボタンで写真を選べます。");
     return;
   }
   // 読みこみ中：カメラが映るまで、画面のまん中に「準備中…」
-  showShootMsg("📷 カメラを準備中…");
+  showShootMsg("カメラを準備中…");
   let stream;
   try {
     stream = await navigator.mediaDevices.getUserMedia({
@@ -67,7 +67,7 @@ async function startCamera() {
       audio: false
     });
   } catch (err) {
-    if (my === camToken) showShootMsg("カメラを使えませんでした。カメラの許可を確かめてね。🖼 で写真も選べます。");
+    if (my === camToken) showShootMsg("カメラを使えませんでした。カメラの許可を確かめてね。写真のボタンで写真も選べます。");
     return;
   }
   if (my !== camToken || $("shoot").hidden) {
@@ -105,7 +105,7 @@ function openShoot() {
   if (!picked) startCamera();
   // きょう以外の日で数えているときは、映像の上に出す（まちがえて撮らないように。写真・動画には入らない）
   $("dayBadge").hidden = !state.day;
-  $("dayBadge").textContent = `📅 ${dotDay(state.day)} で数えています`;
+  $("dayBadge").replaceChildren(lineIcon("calendar"), `${dotDay(state.day)} で数えています`);
   if (!countLabel()) toast(`${MODES[state.mode].dateWord}を入れると、数字が入ります`);
   // はじめてのときだけ「文字は指で動かせます」
   try {
@@ -147,7 +147,7 @@ $("pickFile").addEventListener("change", () => {
     stopCamera();
     $("shootMsg").hidden = true;
     if ($("shoot").hidden) openShoot();
-    toast("選んだ写真に入れます（🔄 でカメラにもどる）");
+    toast("選んだ写真に入れます（切りかえのボタンでカメラにもどる）");
   };
   img.onerror = () => toast("この写真は開けませんでした");
   img.src = URL.createObjectURL(file);
@@ -159,7 +159,7 @@ function renderKind() {
   $("shutter").classList.toggle("is-video", state.kind === "video");
   $("shutter").setAttribute("aria-label", state.kind === "video" ? "録画をはじめる" : "撮る");
   $("sound").hidden = state.kind !== "video";
-  $("sound").textContent = state.sound ? "🎙" : "🔇";
+  $("sound").replaceChildren(lineIcon(state.sound ? "mic" : "mic-off"));
   $("sound").setAttribute("aria-label", state.sound ? "音も録る（押すと音なし）" : "音なし（押すと音も録る）");
 }
 
@@ -351,7 +351,7 @@ function showResult(blob, name, raw = null) {
   const canShare = !!navigator.canShare?.({ files: [file] });
   $("share").hidden = !canShare;
   $("saveHint").hidden = !canShare;
-  $("saveHint").textContent = `iPhone は「📤 保存・共有」→「${blob.type.startsWith("video") ? "ビデオを保存" : "画像を保存"}」で写真アプリに入ります。`;
+  $("saveHint").textContent = `iPhone は「保存・共有」→「${blob.type.startsWith("video") ? "ビデオを保存" : "画像を保存"}」で写真アプリに入ります。`;
   $("download").href = url;
   $("download").download = name;
   $("download").classList.toggle("is-primary", !canShare);
@@ -362,9 +362,9 @@ $("share").addEventListener("click", async () => {
   const file = new File([lastResult.blob], lastResult.name, { type: lastResult.blob.type });
   try {
     await navigator.share({ files: [file] });
-    toast(season("✓ 共有できました"));
+    toast(season("共有できました"));
   } catch (err) {
-    if (err?.name !== "AbortError") toast("共有できませんでした。⬇️ で保存できます");
+    if (err?.name !== "AbortError") toast("共有できませんでした。「ダウンロード」で保存できます");
   }
 });
 // 加工なしも保存：共有できる端末は共有メニュー（写真へ保存など）、できなければダウンロード
@@ -374,7 +374,7 @@ $("rawSave").addEventListener("click", async () => {
   if (navigator.canShare?.({ files: [file] })) {
     try {
       await navigator.share({ files: [file] });
-      toast("✓ 加工なしも保存できました");
+      toast("加工なしも保存できました");
     } catch (err) {
       if (err?.name !== "AbortError") toast("共有できませんでした");
     }
@@ -454,7 +454,7 @@ function bindShoot() {
     state.timer = state.timer === 0 ? 3 : state.timer === 3 ? 10 : 0;
     save();
     renderTimer();
-    toast(state.timer ? `⏱ ${state.timer}秒後に${state.kind === "photo" ? "撮ります" : "録りはじめます"}` : "セルフタイマーなし");
+    toast(state.timer ? `${state.timer}秒後に${state.kind === "photo" ? "撮ります" : "録りはじめます"}` : "セルフタイマーなし");
   });
   renderTimer();
   // 構図のガイド：前に撮った写真を選んで、うっすら重ねる（同じ向き・同じ大きさで撮りやすく）。もう一度押すと消す
@@ -482,7 +482,7 @@ function bindShoot() {
     state.sound = !state.sound;
     save();
     renderKind();
-    toast(state.sound ? "🎙 音も録ります" : "🔇 音なしで録ります");
+    toast(state.sound ? "音も録ります" : "音なしで録ります");
   });
   $("designOpen").addEventListener("click", () => ($("designSheet").hidden ? openDesign() : closeDesign()));
   $("designClose").addEventListener("click", closeDesign);

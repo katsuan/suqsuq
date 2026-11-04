@@ -55,21 +55,21 @@ function qronosLinks(s = state) {
   if (s.mode === "womb") {
     const due = parseDay(s.due);
     if (isNaN(due) || due < parseDay(todayStr())) return [];
-    return [{ label: "👶 出産予定日まで", url: url({ type: "until", date: s.due, title: `${s.name ? s.name + "に" : "赤ちゃんに"}会える日`, emoji: "👶" }) }];
+    return [{ icon: "baby", label: "出産予定日まで", url: url({ type: "until", date: s.due, title: `${s.name ? s.name + "に" : "赤ちゃんに"}会える日`, emoji: "👶" }) }];
   }
   if (s.mode === "anniv") {
     if (isNaN(parseDay(s.since))) return [];
     const title = s.sinceTitle || "記念日";
     const next = upcomingMilestone(s);
     const out = [];
-    if (next) out.push({ label: `🎉 ${next.note || next.label.replace(`${title}から`, "")}まで`, url: url({ type: "until", date: next.date, title: next.note ? `${title}の${next.note}` : next.label, emoji: "🎉" }) });
-    out.push({ label: "💞 毎年の記念日", url: url({ type: "yearly", date: s.since, title, emoji: "💞" }) });
+    if (next) out.push({ icon: "celebrate", label: `${next.note || next.label.replace(`${title}から`, "")}まで`, url: url({ type: "until", date: next.date, title: next.note ? `${title}の${next.note}` : next.label, emoji: "🎉" }) });
+    out.push({ icon: "heart", label: "毎年の記念日", url: url({ type: "yearly", date: s.since, title, emoji: "💞" }) });
     return out;
   }
   if (isNaN(parseDay(s.birth))) return [];
   const links = [];
   const next = upcomingMilestone(s);
-  if (next) links.push({ label: `🎉 ${next.note || next.label}まで`, url: url({ type: "until", date: next.date, title: `${who}${next.note || next.label}`, emoji: "🎉" }) });
-  links.push({ label: "🎂 毎年の誕生日", url: url({ type: "yearly", date: s.birth, title: `${who}誕生日`, emoji: "🎂" }) });
+  if (next) links.push({ icon: "celebrate", label: `${next.note || next.label}まで`, url: url({ type: "until", date: next.date, title: `${who}${next.note || next.label}`, emoji: "🎉" }) });
+  links.push({ icon: "cake", label: "毎年の誕生日", url: url({ type: "yearly", date: s.birth, title: `${who}誕生日`, emoji: "🎂" }) });
   return links;
 }

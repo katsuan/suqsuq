@@ -4,11 +4,12 @@
 "use strict";
 
 // 押すと onClick するチップ（ボタン）を作る
-const chip = (label, pressed, onClick, extra = "") => {
+const chip = (label, pressed, onClick, extra = "", icon = "") => {
   const b = document.createElement("button");
   b.type = "button";
   b.className = `ls-chip ${extra}`.trim();
   b.textContent = label;
+  if (icon) b.prepend(lineIcon(icon)); // 前に Q キットの線アイコン
   b.setAttribute("aria-pressed", String(!!pressed));
   b.addEventListener("click", onClick);
   return b;
@@ -62,7 +63,7 @@ function renderExamples() {
   const memo = $("memoChips");
   memo.replaceChildren();
   for (const t of MEMO_EXAMPLES[state.mode]) memo.append(chip(t, state.memo === t, () => setMemo(state.memo === t ? "" : t)));
-  if (state.memo && !MEMO_EXAMPLES[state.mode].includes(state.memo)) memo.append(chip("✕ けす", false, () => setMemo("")));
+  if (state.memo && !MEMO_EXAMPLES[state.mode].includes(state.memo)) memo.append(chip("けす", false, () => setMemo(""), "", "close"));
   const rec = $("recipeChips");
   rec.replaceChildren();
   for (const r of RECIPES[state.mode]) {
@@ -211,13 +212,14 @@ function renderMyLooks(look) {
   state.myLooks.forEach((m, i) => {
     let held = false; // 長押しで消したあとの「押した」は使わない
     let hold = 0;
-    const b = chip(`★ ${m.name}`, false, () => {
+    const b = chip(m.name, false, () => {
       if (held) return (held = false);
       state.look = Object.assign({}, state.look, m.look);
       restartMotion();
       lookChanged();
       toast(`「${m.name}」の形にしました`);
     });
+    b.prepend(lineIcon("star"));
     // マイテンプレートを消して「元に戻す」を出す（長押し・右クリック）
     const del = (e) => {
       e.preventDefault();
@@ -263,10 +265,10 @@ function renderToday() {
   if (!L) {
     // qcheck-ok: W1 決まった文字だけ
     box.innerHTML = `<p class="ls-hint">${MODES[state.mode].dateWord}を入れると、ここに数えた日が出ます。</p>`;
-    $("cameraOpen").textContent = "📅 まず日付を入れる";
+    $("cameraOpen").replaceChildren(lineIcon("calendar"), "まず日付を入れる");
     return;
   }
-  $("cameraOpen").textContent = "📷 カメラを開く";
+  $("cameraOpen").replaceChildren(lineIcon("camera"), "カメラを開く");
   box.innerHTML =
     `<p class="today-main">${state.day ? "その日は" : "きょうは"} <span>${escHtml(L.top)}</span> <span class="nw"><b>${escHtml(L.big)}</b><span>${escHtml(L.unit)}</span></span> <span>${escHtml(L.small)}</span></p>` +
     `<p class="ls-hint">${escHtml(nextMilestone())}</p>` +
@@ -278,8 +280,8 @@ function qronosRow() {
   const links = qronosLinks();
   if (!links.length) return "";
   return (
-    `<div class="qronos-links"><span class="ls-hint">⏳ くろのすで数える</span>` +
-    links.map((l) => `<a class="ls-chip is-small" href="${escHtml(l.url)}" target="_blank" rel="noopener">${escHtml(l.label)}</a>`).join("") +
+    `<div class="qronos-links"><span class="ls-hint"><span class="ls-icon" data-icon="wait" aria-hidden="true"></span>くろのすで数える</span>` +
+    links.map((l) => `<a class="ls-chip is-small" href="${escHtml(l.url)}" target="_blank" rel="noopener"><span class="ls-icon" data-icon="${escHtml(l.icon)}" aria-hidden="true"></span>${escHtml(l.label)}</a>`).join("") +
     "</div>"
   );
 }

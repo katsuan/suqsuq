@@ -23,76 +23,74 @@ body { margin: 0; font-family: var(--font); color: var(--ink); background: #fff7
 html:has(body.is-shooting), body.is-shooting { background: #111; }
 
 /* はじめの画面 */
-.setup { display: grid; gap: 16px; max-width: 560px; margin: 0 auto; padding: 24px 16px calc(110px + env(safe-area-inset-bottom, 0px)); }
+.setup { display: grid; gap: var(--ls-space-m); max-width: 560px; margin: 0 auto; padding: var(--ls-space-l) var(--ls-space-m) calc(110px + env(safe-area-inset-bottom, 0px)); }
 .ls-brand-icon { width: 28px; height: 28px; border-radius: 7px; }
-/* キャッチコピーはうすい字に（ツールの色は「カメラを開く」だけに使う） */
-.ls-brand-copy { margin-top: -8px; color: var(--ink-soft); font-size: 13px; }
 .ls-label small { font-weight: 700; color: var(--ls-faint, #a3a29b); }
 
-.who { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.who { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--ls-space-s); }
 /* iPhone の date 欄がはみ出さないように（appearance:none ＋ minmax(0,1fr)） */
 input.date { -webkit-appearance: none; appearance: none; min-width: 0; width: 100%; font-size: 16px; text-align: left; }
 input.date::-webkit-date-and-time-value { text-align: left; }
-.ls-row { display: flex; gap: 8px; align-items: center; }
+.ls-row { display: flex; gap: var(--ls-space-s); align-items: center; }
 .ls-row > .ls-input { flex: 1; min-width: 0; }
-.fold-pad { display: grid; gap: 8px; }
+.fold-pad { display: grid; gap: var(--ls-space-s); }
 .fold-title { flex: 1; min-width: 0; }
-.check { display: flex; gap: 8px; align-items: center; font-size: 14px; line-height: 1.5; }
+.check { display: flex; gap: var(--ls-space-s); align-items: center; font-size: 14px; line-height: 1.5; }
 .check input { width: 20px; height: 20px; accent-color: var(--accent); }
 
-.today { display: grid; gap: 4px; padding: 16px; border-radius: 16px; background: var(--ls-accent-soft); }
+.today { display: grid; gap: var(--ls-space-xs); padding: var(--ls-space-m); border-radius: var(--ls-radius-lg); background: var(--ls-accent-soft); }
 .today-main { margin: 0; font-size: 15px; font-weight: 700; }
 .today-main b { font-size: 34px; color: var(--ink); margin: 0 2px; font-variant-numeric: tabular-nums; }
 .today .ls-hint { margin: 0; }
 
 /* うまれたときの記録 */
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ls-space-s); }
 
 /* 節目をカレンダーに */
-.cal-list { display: grid; gap: 8px; max-height: 320px; overflow-y: auto; }
-.cal-row { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 12px; background: var(--ls-surface-sub, #faf7f5); }
-.cal-text { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.cal-list { display: grid; gap: var(--ls-space-s); max-height: 320px; overflow-y: auto; }
+.cal-row { display: flex; align-items: center; gap: var(--ls-space-s); padding: var(--ls-space-s); border-radius: var(--ls-radius-md); background: var(--ls-surface-sub, #faf7f5); }
+.cal-text { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--ls-space-s); cursor: pointer; }
 .cal-text input { flex: none; width: 20px; height: 20px; accent-color: var(--accent); }
 .cal-text span { display: grid; min-width: 0; }
 .cal-text b { font-size: 14px; }
 .cal-text small { font-size: 12px; color: var(--ink-soft); }
-.cal-g { flex: none; padding: 8px 16px; border: 1px solid var(--ls-line-strong, #ccc); border-radius: 999px; color: var(--ink); font-size: 12px; font-weight: 800; text-decoration: none; background: #fff; }
+.cal-g { flex: none; padding: var(--ls-space-s) var(--ls-space-m); border: 1px solid var(--ls-line-strong, #ccc); border-radius: 999px; color: var(--ink); font-size: 12px; font-weight: 800; text-decoration: none; background: #fff; }
 
 /* 文字の形のタブ（形・文字・かざり・保存） */
-.design-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; border-radius: 14px; background: var(--ls-tabs-bg); }
-.design-tabs button { min-height: 40px; padding: 0 4px; border: 0; border-radius: 10px; background: transparent; color: var(--ink-soft); font: inherit; font-size: 13px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.design-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--ls-space-xs); padding: var(--ls-space-xs); border-radius: 14px; background: var(--ls-tabs-bg); }
+.design-tabs button { min-height: 40px; padding: 0 var(--ls-space-xs); border: 0; border-radius: 10px; background: transparent; color: var(--ink-soft); font: inherit; font-size: 13px; font-weight: 800; white-space: nowrap; cursor: pointer; }
 .design-tabs button[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(80, 40, 30, 0.1); }
-.design-group { display: grid; gap: 16px; }
+.design-group { display: grid; gap: var(--ls-space-m); }
 /* 日付がまだないとき、日付の欄を光らせる */
 .ls-input.is-need { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(233, 115, 90, 0.25); }
 
 /* 見本（動画と同じ形。縦長でも画面からはみ出さないよう、高さを決めて幅は形に合わせる）。
    文字の形を変えながら見られるよう、パネルの中で上に止める（上の「生まれてから／おなかの中」のタブの下） */
-.preview-wrap { position: sticky; top: 62px; z-index: 5; display: grid; place-items: center; padding: 8px; border-radius: 16px; background: #f6ebe6; }
-.stage { display: block; max-width: 100%; max-height: 36vh; border-radius: 12px; touch-action: none; box-shadow: 0 6px 18px rgba(80, 40, 30, 0.12); }
+.preview-wrap { position: sticky; top: 62px; z-index: 5; display: grid; place-items: center; padding: var(--ls-space-s); border-radius: var(--ls-radius-lg); background: #f6ebe6; }
+.stage { display: block; max-width: 100%; max-height: 36vh; border-radius: var(--ls-radius-md); touch-action: none; box-shadow: 0 6px 18px rgba(80, 40, 30, 0.12); }
 
-.design { display: grid; gap: 16px; }
-.tpl-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.design { display: grid; gap: var(--ls-space-m); }
+.tpl-row { display: flex; flex-wrap: wrap; gap: var(--ls-space-s); }
 .tpl-chip { font-size: 15px; }
-.size-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.size-row { display: flex; align-items: center; gap: var(--ls-space-s); font-size: 13px; color: var(--ink-soft); }
 .size-row input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); }
-.ls-button.small { min-height: 44px; padding: 0 16px; font-size: 13px; } /* 小さく見えても、押せる高さは 44px（ux.md の C3） */
+.ls-button.small { min-height: 44px; padding: 0 var(--ls-space-m); font-size: 13px; } /* 小さく見えても、押せる高さは 44px（ux.md の C3） */
 .ls-chip.is-add { border-style: dashed; }
 /* ひとことの例：小さめのチップを、入力欄のすぐ下に */
-.example-chips { margin-top: -8px; gap: 8px; }
-.example-chips .ls-chip { min-height: 32px; padding: 0 8px; font-size: 12px; }
+.example-chips { margin-top: calc(var(--ls-space-s) * -1); gap: var(--ls-space-s); }
+.example-chips .ls-chip { min-height: 32px; padding: 0 var(--ls-space-s); font-size: 12px; }
 
 /* ---- 撮る画面 ---- */
 /* 高さは見えている分（100dvh）。100vh や inset:0 だと、スマホのブラウザでは下のバーの裏に入って、シャッターが切れることがある */
 .shoot { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100dvh; z-index: 50; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; background: #111; color: #fff; padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
-.shoot-top { display: flex; align-items: center; gap: 8px; padding: 8px 16px; }
+.shoot-top { display: flex; align-items: center; gap: var(--ls-space-s); padding: var(--ls-space-s) var(--ls-space-m); }
 .shoot-top .seg { margin: 0 auto; }
 .seg { display: inline-flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); }
-.seg button { min-height: 36px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 14px; font-weight: 800; }
+.seg button { min-height: 36px; padding: 0 var(--ls-space-m); border: 0; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 14px; font-weight: 800; }
 .seg button[aria-pressed="true"] { background: #fff; color: var(--ink); }
 .round { flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.16); color: #fff; font: inherit; font-size: 20px; cursor: pointer; }
-.round.wide { width: auto; padding: 0 16px; border-radius: 999px; font-size: 13px; font-weight: 800; }
-.shoot-stage { position: relative; display: grid; place-items: center; min-height: 0; padding: 0 8px; }
+.round.wide { width: auto; padding: 0 var(--ls-space-m); border-radius: 999px; font-size: 13px; font-weight: 800; }
+.shoot-stage { position: relative; display: grid; place-items: center; min-height: 0; padding: 0 var(--ls-space-s); }
 /* 映像は、上下のボタンのあいだに収まる大きさ（js/shoot.js の fitStage で幅・高さを決める。キャンバスの元の大きさで押し広げない） */
 .shoot-stage { overflow: hidden; }
 .shoot-stage .stage { position: absolute; max-width: none; max-height: none; box-shadow: none; border-radius: 10px; }
@@ -104,16 +102,16 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .round.small-label { display: grid; place-items: center; align-content: center; gap: 0; width: 52px; height: 52px; font-size: 18px; line-height: 1; }
 .round.small-label small { font-size: 10px; font-weight: 800; margin-top: 2px; }
 .round.is-on { background: #fff; color: var(--ink); }
-.day-badge { position: absolute; top: 8px; left: 16px; margin: 0; padding: 4px 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.55); font-size: 12px; font-weight: 800; pointer-events: none; }
-.rec-time { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); margin: 0; padding: 4px 8px; border-radius: 999px; background: #e53935; font-weight: 800; font-variant-numeric: tabular-nums; }
-.shoot-msg, .drag-hint { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; padding: 8px 16px; border-radius: 16px; background: rgba(0, 0, 0, 0.7); font-size: 14px; line-height: 1.6; text-align: center; width: max-content; max-width: calc(100% - 40px); pointer-events: none; }
+.day-badge { position: absolute; top: 8px; left: 16px; margin: 0; padding: var(--ls-space-xs) var(--ls-space-s); border-radius: 999px; background: rgba(0, 0, 0, 0.55); font-size: 12px; font-weight: 800; pointer-events: none; }
+.rec-time { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); margin: 0; padding: var(--ls-space-xs) var(--ls-space-s); border-radius: 999px; background: #e53935; font-weight: 800; font-variant-numeric: tabular-nums; }
+.shoot-msg, .drag-hint { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; padding: var(--ls-space-s) var(--ls-space-m); border-radius: var(--ls-radius-lg); background: rgba(0, 0, 0, 0.7); font-size: 14px; line-height: 1.6; text-align: center; width: max-content; max-width: calc(100% - 40px); pointer-events: none; }
 .shoot-msg { top: 40%; }
 .drag-hint { bottom: 16px; }
-.shoot-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 16px max(16px, env(safe-area-inset-bottom, 0px)); }
+.shoot-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--ls-space-s); padding: var(--ls-space-s) var(--ls-space-m) max(var(--ls-space-m), env(safe-area-inset-bottom, 0px)); }
 .shutter { width: 76px; height: 76px; padding: 0; border: 5px solid #fff; border-radius: 50%; background: transparent; display: grid; place-items: center; cursor: pointer; }
 .shutter span { width: 58px; height: 58px; border-radius: 50%; background: #fff; transition: all 0.2s; }
 .shutter.is-video span { background: #e53935; }
-.shoot.is-recording .shutter span { width: 30px; height: 30px; border-radius: 8px; }
+.shoot.is-recording .shutter span { width: 30px; height: 30px; border-radius: var(--ls-radius-sm); }
 .shoot.is-recording .stage { outline: 4px solid #e53935; }
 /* 録画中は、切りかえのボタンを消す */
 .shoot.is-recording :is(#shootHome, .seg, #aspect, #designOpen, #sound, #shootPick, #flip, #timerBtn) { visibility: hidden; }
@@ -123,18 +121,18 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .shoot { grid-template-rows: auto minmax(0, 1fr) auto auto; }
 .shoot.is-designing .shoot-bottom { display: none; }
 .design-sheet { position: relative; z-index: 5; max-height: 48vh; max-height: 48dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); border-radius: 20px 20px 0 0; background: #fff; color: var(--ink); box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; border-bottom: 1px solid var(--ls-line, #eee); }
-.sheet-body { overflow-y: auto; padding: 16px 16px 24px; -webkit-overflow-scrolling: touch; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: var(--ls-space-s) var(--ls-space-m); border-bottom: 1px solid var(--ls-line, #eee); }
+.sheet-body { overflow-y: auto; padding: var(--ls-space-m) var(--ls-space-m) var(--ls-space-l); -webkit-overflow-scrolling: touch; }
 
 /* できた写真・動画 */
-.result { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, 0.75); }
-.result-card { display: grid; gap: 16px; width: min(100%, 440px); max-height: 100%; padding: 16px; border-radius: 20px; background: #fff; grid-template-rows: minmax(0, 1fr) auto; }
+.result { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: var(--ls-space-m); background: rgba(0, 0, 0, 0.75); }
+.result-card { display: grid; gap: var(--ls-space-m); width: min(100%, 440px); max-height: 100%; padding: var(--ls-space-m); border-radius: 20px; background: #fff; grid-template-rows: minmax(0, 1fr) auto; }
 .result-media { min-height: 0; display: grid; place-items: center; }
-.result-media img, .result-media video { display: block; max-width: 100%; max-height: 60vh; border-radius: 12px; background: #000; }
-.result-actions { display: grid; gap: 8px; }
+.result-media img, .result-media video { display: block; max-width: 100%; max-height: 60vh; border-radius: var(--ls-radius-md); background: #000; }
+.result-actions { display: grid; gap: var(--ls-space-s); }
 .result-actions a.ls-button { text-decoration: none; }
-.save-hint { margin: -8px 0 0; font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
-.raw-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 16px; border-radius: 12px; background: var(--ls-surface-sub, #faf7f5); font-size: 13px; font-weight: 700; }
+.save-hint { margin: calc(var(--ls-space-s) * -1) 0 0; font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+.raw-row { display: flex; align-items: center; justify-content: space-between; gap: var(--ls-space-s); padding: var(--ls-space-s) var(--ls-space-m); border-radius: var(--ls-radius-md); background: var(--ls-surface-sub, #faf7f5); font-size: 13px; font-weight: 700; }
 
 /* ---- 暗い表示（index.html の data-ls-dark="auto"。Q キットの色は ui.css が暗くする） ----
  * 撮る画面（.shoot。カメラの上）と、できた写真・動画そのものは、いまのまま。
@@ -157,7 +155,15 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 }
 
 /* くろのすで数える（いまの数えの下） */
-.qronos-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.qronos-links { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ls-space-s); margin-top: var(--ls-space-s); }
 .qronos-links .ls-chip { text-decoration: none; }
 /* 数字と単位（480日目）は1つのまとまりで折り返す */
 .today-main .nw { white-space: nowrap; }
+
+/* 線アイコン（Q キットの .ls-icon）と字の間。タブは前の絵文字と同じく、アイコンを字の上に */
+.ls-tab .ls-icon { display: block; margin: 0 auto 2px; }
+.ls-panel-title .ls-icon, .sheet-title .ls-icon, .qronos-links .ls-hint .ls-icon, .day-badge .ls-icon { margin-right: var(--ls-space-xs); }
+.design-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: var(--ls-space-xs); }
+.design-tabs .ls-icon { width: 16px; height: 16px; }
+.round .ls-icon { width: 24px; height: 24px; }
+.round.small-label .ls-icon { width: 20px; height: 20px; }

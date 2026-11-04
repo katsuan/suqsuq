@@ -162,7 +162,7 @@ function renderCalendar() {
 function renderCalCount() {
   const n = milestoneList().filter((m) => !calOff.has(calKey(m))).length;
   $("calIcs").disabled = n === 0;
-  $("calIcs").textContent = `📥 ${n}件をまとめてカレンダーに入れる`;
+  $("calIcs").replaceChildren(lineIcon("inbox"), `${n}件をまとめてカレンダーに入れる`);
 }
 
 // 「🔔 節目をカレンダーに」のボタン・チェックをつなぐ（はじめに一度）

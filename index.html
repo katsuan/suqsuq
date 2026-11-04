@@ -42,9 +42,9 @@
   <p class="ls-brand-copy">すくすく、まいにちが記念日</p>
 
   <div class="ls-tabs" role="tablist" aria-label="数えかた">
-    <button class="ls-tab" type="button" role="tab" data-mode="born" aria-selected="true">👶 生まれて</button>
-    <button class="ls-tab" type="button" role="tab" data-mode="womb" aria-selected="false">🤰 おなかの中</button>
-    <button class="ls-tab" type="button" role="tab" data-mode="anniv" aria-selected="false">💞 記念日</button>
+    <button class="ls-tab" type="button" role="tab" data-mode="born" aria-selected="true"><span class="ls-icon" data-icon="baby" aria-hidden="true"></span>生まれて</button>
+    <button class="ls-tab" type="button" role="tab" data-mode="womb" aria-selected="false"><span class="ls-icon" data-icon="heart-pulse" aria-hidden="true"></span>おなかの中</button>
+    <button class="ls-tab" type="button" role="tab" data-mode="anniv" aria-selected="false"><span class="ls-icon" data-icon="heart" aria-hidden="true"></span>記念日</button>
   </div>
 
   <!-- だれの・いつから -->
@@ -76,7 +76,7 @@
     <!-- いまの数え（大きく）と、つぎの節目 -->
     <div class="today" id="today" aria-live="polite"></div>
     <details class="ls-fold">
-      <summary><span class="ls-fold-icon">📅</span><span class="fold-title">数える日</span><span class="ls-fold-meta" id="dayMeta">きょう</span></summary>
+      <summary><span class="ls-fold-icon ls-icon" data-icon="calendar" aria-hidden="true"></span><span class="fold-title">数える日</span><span class="ls-fold-meta" id="dayMeta">きょう</span></summary>
       <div class="ls-fold-body fold-pad">
         <p class="ls-hint">前に撮った写真に入れるときは、その写真の日にします。</p>
         <div class="ls-row">
@@ -88,7 +88,7 @@
     </details>
     <!-- 節目をカレンダーに（お知らせはカレンダーのお知らせで。js/calendar.js） -->
     <details class="ls-fold">
-      <summary><span class="ls-fold-icon">🔔</span><span class="fold-title">節目をカレンダーに</span><span class="ls-fold-meta" id="calMeta"></span></summary>
+      <summary><span class="ls-fold-icon ls-icon" data-icon="bell" aria-hidden="true"></span><span class="fold-title">節目をカレンダーに</span><span class="ls-fold-meta" id="calMeta"></span></summary>
       <div class="ls-fold-body fold-pad">
         <p class="ls-hint">これからの節目を、カレンダーの予定に入れます。その日にカレンダーがお知らせしてくれます。</p>
         <label class="check" id="calWeeklyRow" hidden><input id="calWeekly" type="checkbox"> 毎週（◯週になった日）も入れる</label>
@@ -97,15 +97,15 @@
           <span class="ls-label">お知らせ <small>（まとめて入れるとき）</small></span>
           <div class="ls-chips" id="calRemind"></div>
         </div>
-        <button id="calIcs" class="ls-button is-primary is-block" type="button">📥 まとめてカレンダーに入れる</button>
+        <button id="calIcs" class="ls-button is-primary is-block" type="button"><span class="ls-icon" data-icon="inbox" aria-hidden="true"></span>まとめてカレンダーに入れる</button>
         <p class="ls-hint">iPhone はファイルを開くと「すべてを追加」で入ります。1件ずつ入れるときは「Google」（お知らせは Google カレンダーの決まりのもの）。</p>
       </div>
     </details>
     <!-- うまれたときの記録（バースフォトの定番：時刻・体重・身長）。入れたものだけ写真に -->
     <details class="ls-fold" data-mode-only="born">
-      <summary><span class="ls-fold-icon">👶</span><span class="fold-title">うまれたときの記録</span><span class="ls-fold-meta" id="statsMeta"></span></summary>
+      <summary><span class="ls-fold-icon ls-icon" data-icon="notebook" aria-hidden="true"></span><span class="fold-title">うまれたときの記録</span><span class="ls-fold-meta" id="statsMeta"></span></summary>
       <div class="ls-fold-body fold-pad">
-        <p class="ls-hint">入れると、写真の数字の下に「3,120g ・ 49.5cm ・ 4:32 生まれ」のように入ります（下の「✏️ 文字」の「いっしょに入れる」で消せます）。入れたものだけ出ます。</p>
+        <p class="ls-hint">入れると、写真の数字の下に「3,120g ・ 49.5cm ・ 4:32 生まれ」のように入ります（下の「文字」の「いっしょに入れる」で消せます）。入れたものだけ出ます。</p>
         <div class="stats">
           <label class="ls-field"><span class="ls-label">時刻</span><input id="bTime" class="ls-input date" type="time"></label>
           <label class="ls-field"><span class="ls-label">体重（g）</span><input id="bWeight" class="ls-input" inputmode="decimal" maxlength="6" placeholder="例 3120"></label>
@@ -119,7 +119,7 @@
   <!-- 文字の形（テンプレート・位置・大きさ・スタンプ・動き）。カメラの画面では、下から出るシートに移す -->
   <section class="ls-panel">
     <div class="ls-panel-head">
-      <h2 class="ls-panel-title">🎨 写真に入れる文字</h2>
+      <h2 class="ls-panel-title"><span class="ls-icon" data-icon="palette" aria-hidden="true"></span>写真に入れる文字</h2>
       <p class="ls-panel-note">見本の文字は、指で動かせます。</p>
     </div>
     <div class="preview-wrap">
@@ -128,10 +128,10 @@
     <!-- 文字の形。4つのタブ（形・文字・かざり・保存）に分ける。撮る画面では、下から出るシートに移す -->
     <div id="design" class="design">
       <div class="design-tabs" role="tablist" aria-label="文字の形">
-        <button type="button" role="tab" data-dtab="look" aria-selected="true">🎨 形</button>
-        <button type="button" role="tab" data-dtab="text" aria-selected="false">✏️ 文字</button>
-        <button type="button" role="tab" data-dtab="deco" aria-selected="false">✨ かざり</button>
-        <button type="button" role="tab" data-dtab="save" aria-selected="false">💾 保存</button>
+        <button type="button" role="tab" data-dtab="look" aria-selected="true"><span class="ls-icon" data-icon="palette" aria-hidden="true"></span>形</button>
+        <button type="button" role="tab" data-dtab="text" aria-selected="false"><span class="ls-icon" data-icon="edit" aria-hidden="true"></span>文字</button>
+        <button type="button" role="tab" data-dtab="deco" aria-selected="false"><span class="ls-icon" data-icon="sparkles" aria-hidden="true"></span>かざり</button>
+        <button type="button" role="tab" data-dtab="save" aria-selected="false"><span class="ls-icon" data-icon="save" aria-hidden="true"></span>保存</button>
       </div>
 
       <div class="design-group" data-group="look">
@@ -207,8 +207,8 @@
 <div class="ls-sendbar" id="setupBar">
   <div class="ls-sendbar-inner">
     <div class="ls-sendbar-row">
-      <button id="pickOpen" class="ls-button ls-send-secondary" type="button" aria-label="写真を選ぶ">🖼 写真</button>
-      <button id="cameraOpen" class="ls-button is-primary" type="button">📷 カメラを開く</button>
+      <button id="pickOpen" class="ls-button ls-send-secondary" type="button" aria-label="写真を選ぶ"><span class="ls-icon" data-icon="image" aria-hidden="true"></span>写真</button>
+      <button id="cameraOpen" class="ls-button is-primary" type="button"><span class="ls-icon" data-icon="camera" aria-hidden="true"></span>カメラを開く</button>
     </div>
   </div>
 </div>
@@ -218,14 +218,14 @@
 <!-- 撮る画面：映像と文字を1つのキャンバスに描き、写真はそのまま画像に、動画はキャンバスを録る -->
 <section id="shoot" class="shoot" hidden>
   <div class="shoot-top">
-    <button id="shootHome" class="round" type="button" aria-label="はじめの画面へ">🏠</button>
+    <button id="shootHome" class="round" type="button" aria-label="はじめの画面へ"><span class="ls-icon" data-icon="back" aria-hidden="true"></span></button>
     <div class="seg" role="tablist" aria-label="写真か動画か">
       <button type="button" data-kind="photo" aria-pressed="true">写真</button>
       <button type="button" data-kind="video" aria-pressed="false">動画</button>
     </div>
-    <button id="sound" class="round" type="button" hidden>🎙</button>
+    <button id="sound" class="round" type="button" hidden><span class="ls-icon" data-icon="mic" aria-hidden="true"></span></button>
     <button id="aspect" class="round wide" type="button" aria-label="画面の形">9:16</button>
-    <button id="designOpen" class="round" type="button" aria-label="文字の形を変える">🎨</button>
+    <button id="designOpen" class="round" type="button" aria-label="文字の形を変える"><span class="ls-icon" data-icon="palette" aria-hidden="true"></span></button>
   </div>
   <div class="shoot-stage">
     <canvas id="stage" class="stage"></canvas>
@@ -238,15 +238,15 @@
     <p id="dragHint" class="drag-hint" hidden>文字は指で動かせます</p>
   </div>
   <div class="shoot-bottom">
-    <button id="shootPick" class="round" type="button" aria-label="写真を選ぶ">🖼</button>
+    <button id="shootPick" class="round" type="button" aria-label="写真を選ぶ"><span class="ls-icon" data-icon="image" aria-hidden="true"></span></button>
     <button id="guideBtn" class="round small-label" type="button" aria-label="前の写真をうっすら重ねる">◐<small>重ねる</small></button>
     <button id="shutter" class="shutter" type="button" aria-label="撮る"><span></span></button>
-    <button id="timerBtn" class="round small-label" type="button" aria-label="セルフタイマー">⏱<small>なし</small></button>
-    <button id="flip" class="round" type="button" aria-label="カメラを切りかえる">🔄</button>
+    <button id="timerBtn" class="round small-label" type="button" aria-label="セルフタイマー"><span class="ls-icon" data-icon="clock" aria-hidden="true"></span><small>なし</small></button>
+    <button id="flip" class="round" type="button" aria-label="カメラを切りかえる"><span class="ls-icon" data-icon="refresh" aria-hidden="true"></span></button>
   </div>
   <!-- 文字の形のシート（はじめの画面の #design をここに移す） -->
   <div id="designSheet" class="design-sheet" hidden>
-    <div class="sheet-head"><b>🎨 文字の形</b><button id="designClose" class="ls-button small" type="button">とじる</button></div>
+    <div class="sheet-head"><b class="sheet-title"><span class="ls-icon" data-icon="palette" aria-hidden="true"></span>文字の形</b><button id="designClose" class="ls-button small" type="button">とじる</button></div>
     <div id="designSlot" class="sheet-body"></div>
   </div>
 </section>
@@ -256,13 +256,13 @@
   <div class="result-card">
     <div class="result-media" id="resultMedia"></div>
     <div class="result-actions">
-      <button id="share" class="ls-button is-primary is-block" type="button">📤 保存・共有</button>
+      <button id="share" class="ls-button is-primary is-block" type="button"><span class="ls-icon" data-icon="share" aria-hidden="true"></span>保存・共有</button>
       <p id="saveHint" class="save-hint" hidden></p>
-      <a id="download" class="ls-button is-block" download>⬇️ ダウンロード</a>
+      <a id="download" class="ls-button is-block" download><span class="ls-icon" data-icon="save" aria-hidden="true"></span>ダウンロード</a>
       <!-- 加工なしの元の写真・動画（設定でオンのとき） -->
       <div id="rawRow" class="raw-row" hidden>
         <span>加工なしの元の<span id="rawKind">写真</span></span>
-        <button id="rawSave" class="ls-button small" type="button">📤 加工なしも保存</button>
+        <button id="rawSave" class="ls-button small" type="button"><span class="ls-icon" data-icon="save" aria-hidden="true"></span>加工なしも保存</button>
       </div>
       <button id="again" class="ls-button is-block" type="button">もう一度撮る</button>
     </div>
