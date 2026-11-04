@@ -409,8 +409,8 @@ function closeDesign() {
   requestAnimationFrame(fitStage);
 }
 
-// 撮る画面のボタンをつなぐ（はじめに一度）
-function bindShoot() {
+// 撮る画面を開く・写真を選ぶ・はじめの画面へもどるボタン
+function bindShootOpen() {
   $("cameraOpen").addEventListener("click", () => {
     if (needDate()) return;
     picked = null;
@@ -419,6 +419,10 @@ function bindShoot() {
   $("pickOpen").addEventListener("click", () => needDate() || pickPhoto());
   $("shootPick").addEventListener("click", pickPhoto);
   $("shootHome").addEventListener("click", closeShoot);
+}
+
+// 撮る画面のカメラのボタン（切りかえ・形・写真と動画・シャッター・セルフタイマー・音）
+function bindShootCamera() {
   $("flip").addEventListener("click", () => {
     if (recorder) return;
     if (picked) picked = null; // 写真からカメラへもどる
@@ -457,7 +461,17 @@ function bindShoot() {
     toast(state.timer ? `${state.timer}秒後に${state.kind === "photo" ? "撮ります" : "録りはじめます"}` : "セルフタイマーなし");
   });
   renderTimer();
-  // 構図のガイド：前に撮った写真を選んで、うっすら重ねる（同じ向き・同じ大きさで撮りやすく）。もう一度押すと消す
+  $("sound").addEventListener("click", () => {
+    if (recorder) return;
+    state.sound = !state.sound;
+    save();
+    renderKind();
+    toast(state.sound ? "音も録ります" : "音なしで録ります");
+  });
+}
+
+// 構図のガイド：前に撮った写真を選んで、うっすら重ねる（同じ向き・同じ大きさで撮りやすく）。もう一度押すと消す
+function bindShootGuide() {
   $("guideBtn").addEventListener("click", () => {
     if (!$("guide").hidden) {
       $("guide").hidden = true;
@@ -477,13 +491,13 @@ function bindShoot() {
     fitStage();
     toast("前の写真をうっすら重ねました（写真・動画には入りません）");
   });
-  $("sound").addEventListener("click", () => {
-    if (recorder) return;
-    state.sound = !state.sound;
-    save();
-    renderKind();
-    toast(state.sound ? "音も録ります" : "音なしで録ります");
-  });
+}
+
+// 撮る画面のボタンをつなぐ（はじめに一度）
+function bindShoot() {
+  bindShootOpen();
+  bindShootCamera();
+  bindShootGuide();
   $("designOpen").addEventListener("click", () => ($("designSheet").hidden ? openDesign() : closeDesign()));
   $("designClose").addEventListener("click", closeDesign);
   attachDrag($("stage"), () => stageBox, () => ($("dragHint").hidden = true));

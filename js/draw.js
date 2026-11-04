@@ -1,6 +1,6 @@
 // すくすく：描く。映像（または写真）→ 動くスタンプ → 文字（テンプレート）の順に、1枚のキャンバスへ。
 // 見本（はじめの画面）・撮る画面・写真・動画で、同じ drawScene を使う（だから見たとおりに残る）。
-// 読まれるところ：index.html（js/ui.js のあと）。見本と撮る画面の描画で使う
+// 読まれるところ：index.html（js/ui.js のあと）。見本と撮る画面の描画で使う。動くスタンプの描き方は js/stamps.js
 "use strict";
 
 // 画面の形（キャンバスの大きさ）。短いほうを 1080 に
@@ -119,204 +119,6 @@ const TEMPLATES = [
 // id のテンプレート（なければはじめのもの）
 const tplOf = (id) => TEMPLATES.find((t) => t.id === id) || TEMPLATES[0];
 
-// ---- 動くスタンプ ----
-const STAMPS = [
-  { id: "sparkle", label: "✨ キラキラ" },
-  { id: "heart", label: "💗 ハート" },
-  { id: "bubble", label: "🫧 しゃぼん玉" },
-  { id: "petal", label: "🌸 はなびら" },
-  { id: "star", label: "⭐ ほし" },
-  { id: "confetti", label: "🎊 紙ふぶき" },
-  { id: "balloon", label: "🎈 ふうせん" }
-];
-// 文字の動き（動画のとき。写真では止まった形）
-const MOTIONS = [
-  { id: "none", label: "なし" },
-  { id: "float", label: "ふわふわ" },
-  { id: "pop", label: "ぽよん" },
-  { id: "count", label: "カウントアップ" },
-  { id: "wave", label: "なみ" }
-];
-
-// いつも同じになる乱数（i 番目のつぶの k 番目の値）
-const rnd = (i, k) => {
-  const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453;
-  return x - Math.floor(x);
-};
-
-// ハートの道を作る
-function heartPath(ctx, s) {
-  ctx.beginPath();
-  ctx.moveTo(0, s * 0.35);
-  ctx.bezierCurveTo(-s * 1.1, -s * 0.35, -s * 0.5, -s * 1.05, 0, -s * 0.45);
-  ctx.bezierCurveTo(s * 0.5, -s * 1.05, s * 1.1, -s * 0.35, 0, s * 0.35);
-  ctx.closePath();
-}
-// 星の道を作る（points 個のとがり）
-function starPath(ctx, r, points, inner) {
-  ctx.beginPath();
-  for (let i = 0; i < points * 2; i++) {
-    const a = (Math.PI * i) / points - Math.PI / 2;
-    const rr = i % 2 ? r * inner : r;
-    ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
-  }
-  ctx.closePath();
-}
-// キラッ（4つの角が細い星）
-function twinklePath(ctx, r) {
-  ctx.beginPath();
-  ctx.moveTo(0, -r);
-  ctx.quadraticCurveTo(0, 0, r, 0);
-  ctx.quadraticCurveTo(0, 0, 0, r);
-  ctx.quadraticCurveTo(0, 0, -r, 0);
-  ctx.quadraticCurveTo(0, 0, 0, -r);
-  ctx.closePath();
-}
-
-// 下から上へ（または上から下へ）流れるつぶの、いまの位置（0〜1）
-const flow = (t, i, period) => (t / period + rnd(i, 3)) % 1;
-
-// 動くスタンプを1つ描く（t 秒の時点の形で）
-function drawStamp(ctx, id, W, H, t, color) {
-  const u = Math.min(W, H) / 1080;
-  ctx.save();
-  if (id === "sparkle" || id === "star") {
-    const n = id === "sparkle" ? 16 : 12;
-    for (let i = 0; i < n; i++) {
-      const speed = 1.2 + rnd(i, 5) * 1.6;
-      const ph = t * speed + rnd(i, 3) * 6.28;
-      const cycle = Math.floor(ph / 6.28);
-      const s = Math.max(0, Math.sin(ph));
-      const x = rnd(i + cycle * 31, 1) * W, y = rnd(i + cycle * 31, 2) * H;
-      const r = (24 + rnd(i, 4) * 34) * u * s;
-      if (r < 1) continue;
-      ctx.save();
-      ctx.translate(x, y);
-      if (id === "sparkle") {
-        ctx.shadowColor = "rgba(255,255,255,0.9)";
-        ctx.shadowBlur = 18 * u;
-        ctx.fillStyle = "#ffffff";
-        twinklePath(ctx, r);
-      } else {
-        ctx.rotate(t * 0.8 + i);
-        ctx.shadowColor = "rgba(255,200,80,0.7)";
-        ctx.shadowBlur = 14 * u;
-        ctx.fillStyle = "#ffd56b";
-        starPath(ctx, r * 0.8, 5, 0.48);
-      }
-      ctx.fill();
-      ctx.restore();
-    }
-  } else if (id === "heart") {
-    const colors = ["#ff8fab", "#ff6b8b", "#ffc2d1", color];
-    for (let i = 0; i < 12; i++) {
-      const p = flow(t, i, 6 + rnd(i, 5) * 4);
-      const x = rnd(i, 1) * W + Math.sin(t * 1.5 + i) * 30 * u;
-      const y = H * (1.08 - p * 1.25);
-      const s = (30 + rnd(i, 4) * 34) * u;
-      ctx.save();
-      ctx.globalAlpha = clamp01(Math.min((1 - p) * 3, p * 8)) * 0.9;
-      ctx.translate(x, y);
-      ctx.rotate(Math.sin(t * 2 + i) * 0.25);
-      ctx.fillStyle = colors[i % colors.length];
-      heartPath(ctx, s);
-      ctx.fill();
-      ctx.restore();
-    }
-  } else if (id === "bubble") {
-    for (let i = 0; i < 14; i++) {
-      const p = flow(t, i, 7 + rnd(i, 5) * 5);
-      const r = (18 + rnd(i, 4) * 46) * u;
-      const x = rnd(i, 1) * W + Math.sin(t * 1.2 + i * 2) * 40 * u;
-      const y = H * (1.08 - p * 1.25);
-      ctx.save();
-      ctx.globalAlpha = clamp01(Math.min((1 - p) * 4, p * 8));
-      const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
-      g.addColorStop(0, "rgba(255,255,255,0.05)");
-      g.addColorStop(0.75, "rgba(200,230,255,0.18)");
-      g.addColorStop(1, "rgba(255,255,255,0.55)");
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.75)";
-      ctx.lineWidth = 2.5 * u;
-      ctx.stroke();
-      ctx.fillStyle = "rgba(255,255,255,0.9)";
-      ctx.beginPath();
-      ctx.ellipse(x - r * 0.38, y - r * 0.4, r * 0.18, r * 0.1, -0.7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-  } else if (id === "petal") {
-    for (let i = 0; i < 16; i++) {
-      const p = flow(t, i, 8 + rnd(i, 5) * 5);
-      const s = (16 + rnd(i, 4) * 16) * u;
-      const x = rnd(i, 1) * W + Math.sin(t * 0.9 + i) * 70 * u;
-      const y = H * (-0.08 + p * 1.2);
-      ctx.save();
-      ctx.globalAlpha = clamp01(Math.min((1 - p) * 5, p * 10)) * 0.95;
-      ctx.translate(x, y);
-      ctx.rotate(t * (0.6 + rnd(i, 6)) + i);
-      ctx.scale(1, 0.55 + 0.45 * Math.cos(t * 2 + i)); // ひらひら
-      ctx.fillStyle = i % 3 ? "#ffc8d6" : "#ffb0c4";
-      ctx.beginPath();
-      ctx.moveTo(0, -s * 1.2);
-      ctx.quadraticCurveTo(s * 1.1, -s * 0.2, 0, s * 1.1);
-      ctx.quadraticCurveTo(-s * 1.1, -s * 0.2, 0, -s * 1.2);
-      ctx.fill();
-      ctx.restore();
-    }
-  } else if (id === "confetti") {
-    const colors = ["#ff8fab", "#ffd56b", "#7fd1ae", "#7cb8f0", "#b39ddb", color];
-    for (let i = 0; i < 40; i++) {
-      const p = flow(t, i, 5 + rnd(i, 5) * 4);
-      const x = rnd(i, 1) * W + Math.sin(t * 1.3 + i) * 40 * u;
-      const y = H * (-0.05 + p * 1.12);
-      const s = (10 + rnd(i, 4) * 10) * u;
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(t * (1 + rnd(i, 6) * 2) + i);
-      ctx.scale(1, Math.cos(t * 4 + i * 1.7));
-      ctx.fillStyle = colors[i % colors.length];
-      ctx.fillRect(-s, -s * 0.5, s * 2, s);
-      ctx.restore();
-    }
-  } else if (id === "balloon") {
-    const colors = ["#ff8fab", "#ffd56b", "#7cb8f0", "#7fd1ae", "#b39ddb", color];
-    for (let i = 0; i < 6; i++) {
-      const p = flow(t, i, 11 + rnd(i, 5) * 6);
-      const r = (46 + rnd(i, 4) * 26) * u;
-      const x = (0.08 + 0.84 * rnd(i, 1)) * W + Math.sin(t * 0.8 + i) * 30 * u;
-      const y = H * (1.15 - p * 1.4);
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(Math.sin(t * 0.9 + i) * 0.08);
-      ctx.strokeStyle = "rgba(255,255,255,0.8)";
-      ctx.lineWidth = 2.5 * u;
-      ctx.beginPath();
-      ctx.moveTo(0, r * 1.2);
-      ctx.bezierCurveTo(r * 0.3, r * 1.8, -r * 0.3, r * 2.3, r * 0.1, r * 3);
-      ctx.stroke();
-      ctx.fillStyle = colors[i % colors.length];
-      ctx.beginPath();
-      ctx.ellipse(0, 0, r, r * 1.2, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath(); // むすび目
-      ctx.moveTo(-r * 0.12, r * 1.26);
-      ctx.lineTo(r * 0.12, r * 1.26);
-      ctx.lineTo(0, r * 1.14);
-      ctx.fill();
-      ctx.fillStyle = "rgba(255,255,255,0.45)";
-      ctx.beginPath();
-      ctx.ellipse(-r * 0.38, -r * 0.45, r * 0.16, r * 0.3, 0.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-  ctx.restore();
-}
-
 // ---- 文字 ----
 function fontFor(tpl, part, size, text) {
   if (part === "big" && tpl.numFont && isLatin(text)) return `${tpl.numStyle || ""} 600 ${size}px ${tpl.numFont}`;
@@ -381,23 +183,19 @@ function drawText(ctx, tpl, part, text, x, y, color, k, t, wave) {
   }
 }
 
-// 文字のまとまりを (cx, cy) を真ん中に描く。返すのは、ドラッグに使う範囲
-function drawLabel(ctx, W, H, look, label, t, still) {
-  const tpl = tplOf(look.tpl);
-  const color = look.color;
-  const base = Math.min(W, H) / 1080;
-  // カウントアップ：はじめの 1.8 秒で 1 からその数まで
-  let shown = label;
-  if (!still && look.motion === "count" && label.num != null) {
-    const p = clamp01(t / 1.8);
-    shown = { ...label, big: String(Math.max(1, Math.round(label.num * (1 - Math.pow(1 - p, 3))))) };
-  }
-  let k = base * (tpl.fixed ? 1 : look.size);
+// カウントアップの途中の数（はじめの 1.8 秒で 1 からその数まで）。写真・ほかの動きでは、そのまま
+function countingLabel(label, look, t, still) {
+  if (still || look.motion !== "count" || label.num == null) return label;
+  const p = clamp01(t / 1.8);
+  return { ...label, big: String(Math.max(1, Math.round(label.num * (1 - Math.pow(1 - p, 3))))) };
+}
+
+// 文字の行と大きさ（画面からはみ出さないように縮める）。幅は数えおわったときに合わせる（動いても横にゆれない）。{ k, rows, bw, bh }
+function fitLabel(ctx, tpl, shown, label, k, W) {
   let rows = layoutRows(ctx, tpl, shown, k);
-  const final = shown === label ? rows : layoutRows(ctx, tpl, label, k); // 幅は数えおわったときに合わせる（動いても横にゆれない）
+  const final = shown === label ? rows : layoutRows(ctx, tpl, label, k);
   let bw = Math.max(...final.map((r) => r.w));
   let bh = rowsHeight(rows);
-  // 画面からはみ出さないように縮める
   const maxW = W * (tpl.circle ? 0.5 : 0.9);
   if (bw > maxW) {
     k *= maxW / bw;
@@ -405,136 +203,148 @@ function drawLabel(ctx, W, H, look, label, t, still) {
     bw = maxW;
     bh = rowsHeight(rows);
   }
+  return { k, rows, bw, bh };
+}
 
-  let cx, cy;
-  if (tpl.frame) {
-    // フレーム：白いふち（下を広く）の中に文字。位置は動かせない
-    const side = Math.min(W, H) * 0.045;
-    const band = H * (W > H ? 0.2 : 0.17);
-    ctx.save();
-    ctx.fillStyle = "#fffdf9";
-    ctx.fillRect(0, 0, W, side);
-    ctx.fillRect(0, 0, side, H);
-    ctx.fillRect(W - side, 0, side, H);
-    ctx.fillRect(0, H - band, W, band);
-    ctx.restore();
-    const fit = Math.min(1, (band * 0.82) / bh, (W * 0.86) / bw);
-    if (fit < 1) {
-      k *= fit;
-      rows = layoutRows(ctx, tpl, shown, k);
-      bw *= fit;
-      bh = rowsHeight(rows);
-    }
-    cx = W / 2;
-    cy = H - band / 2;
-  } else {
-    const [px, py] = look.x == null ? tpl.pos : [look.x, look.y];
-    // 飾りごと画面の中におさめる（はしに寄せても切れない）
-    const hw = tpl.circle ? badgeR(bw, bh, k) + 4 * k : bw / 2 + 20 * k;
-    const hh = tpl.circle ? hw : bh / 2 + 20 * k;
-    // 文字が枠からはみ出さない位置にする
-    const fit = (v, half, size) => (half * 2 >= size ? size / 2 : Math.min(size - half, Math.max(half, v)));
-    cx = fit(px * W, hw, W);
-    cy = fit(py * H, hh, H);
-  }
-
+// フレーム：白いふち（下を広く）を描き、文字を下のふちに入る大きさにする。位置は動かせない。{ k, rows, bw, bh, cx, cy }
+function frameLabel(ctx, tpl, shown, W, H, box) {
+  let { k, rows, bw, bh } = box;
+  const side = Math.min(W, H) * 0.045;
+  const band = H * (W > H ? 0.2 : 0.17);
   ctx.save();
-  ctx.translate(cx, cy);
-  // 文字の動き（写真のときは止まった形）
-  if (!still && !tpl.fixed) {
-    if (look.motion === "float") {
-      ctx.translate(0, Math.sin(t * 1.6) * 12 * base);
-      ctx.rotate((Math.sin(t * 1.1) * 1.5 * Math.PI) / 180);
-    } else if (look.motion === "pop" || look.motion === "count") {
-      const enter = look.motion === "pop" ? 0.7 : 0;
-      let s = 1;
-      if (enter && t < enter) s = Math.max(0.01, easeOutBack(t / enter));
-      const at = look.motion === "pop" ? (t - enter) % 3.5 : t - 1.8; // ぽよん：3.5 秒ごと／カウントアップ：数えおわりに1回
-      if (at > 0 && at < 0.5) s *= 1 + Math.sin((at / 0.5) * Math.PI) * 0.09;
-      ctx.scale(s, s);
-    }
+  ctx.fillStyle = "#fffdf9";
+  ctx.fillRect(0, 0, W, side);
+  ctx.fillRect(0, 0, side, H);
+  ctx.fillRect(W - side, 0, side, H);
+  ctx.fillRect(0, H - band, W, band);
+  ctx.restore();
+  const fit = Math.min(1, (band * 0.82) / bh, (W * 0.86) / bw);
+  if (fit < 1) {
+    k *= fit;
+    rows = layoutRows(ctx, tpl, shown, k);
+    bw *= fit;
+    bh = rowsHeight(rows);
   }
+  return { k, rows, bw, bh, cx: W / 2, cy: H - band / 2 };
+}
 
-  // 後ろの飾り
-  const padX = 60 * k, padY = 44 * k;
-  if (tpl.paper) {
-    ctx.save();
-    ctx.rotate((-3 * Math.PI) / 180);
-    ctx.shadowColor = "rgba(0,0,0,0.22)";
-    ctx.shadowBlur = 24 * k;
-    ctx.shadowOffsetY = 8 * k;
-    ctx.fillStyle = "#fffaf0";
-    roundRect(ctx, -bw / 2 - padX, -bh / 2 - padY, bw + padX * 2, bh + padY * 2, 22 * k);
-    ctx.fill();
-    ctx.shadowColor = "transparent";
-    ctx.globalAlpha = 0.6; // マスキングテープ
-    ctx.fillStyle = lightColor(color) ? "#f4b740" : color;
-    ctx.rotate((5 * Math.PI) / 180);
-    ctx.fillRect(-90 * k, -bh / 2 - padY - 26 * k, 180 * k, 52 * k);
-    ctx.restore();
-  }
-  if (tpl.circle) {
-    const r = badgeR(bw, bh, k);
-    ctx.save();
-    ctx.shadowColor = "rgba(0,0,0,0.25)";
-    ctx.shadowBlur = 24 * k;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowColor = "transparent";
-    ctx.strokeStyle = "rgba(255,255,255,0.9)";
-    ctx.lineWidth = 8 * k;
-    ctx.setLineDash([2 * k, 16 * k]);
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.arc(0, 0, r - 22 * k, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-  }
+// 文字のまん中の位置（動かした位置。飾りごと画面の中におさめる：はしに寄せても切れない）。[cx, cy]
+function labelCenter(look, tpl, W, H, { k, bw, bh }) {
+  const [px, py] = look.x == null ? tpl.pos : [look.x, look.y];
+  const hw = tpl.circle ? badgeR(bw, bh, k) + 4 * k : bw / 2 + 20 * k;
+  const hh = tpl.circle ? hw : bh / 2 + 20 * k;
+  // 文字が枠からはみ出さない位置にする
+  const fit = (v, half, size) => (half * 2 >= size ? size / 2 : Math.min(size - half, Math.max(half, v)));
+  return [fit(px * W, hw, W), fit(py * H, hh, H)];
+}
 
-  // 行を上から描く（字の下のそろえ方は alphabetic。大きな数字の行は、字の下をそろえる）
+// 文字の動き（ふわふわ・ぽよん・カウントアップの最後の1回）。写真と、形が決まっているテンプレートでは動かさない
+function applyMotion(ctx, look, tpl, t, still, base) {
+  if (still || tpl.fixed) return;
+  if (look.motion === "float") {
+    ctx.translate(0, Math.sin(t * 1.6) * 12 * base);
+    ctx.rotate((Math.sin(t * 1.1) * 1.5 * Math.PI) / 180);
+  } else if (look.motion === "pop" || look.motion === "count") {
+    const enter = look.motion === "pop" ? 0.7 : 0;
+    let s = 1;
+    if (enter && t < enter) s = Math.max(0.01, easeOutBack(t / enter));
+    const at = look.motion === "pop" ? (t - enter) % 3.5 : t - 1.8; // ぽよん：3.5 秒ごと／カウントアップ：数えおわりに1回
+    if (at > 0 && at < 0.5) s *= 1 + Math.sin((at / 0.5) * Math.PI) * 0.09;
+    ctx.scale(s, s);
+  }
+}
+
+// 後ろの飾り：紙（少しかたむけて、上にマスキングテープ）
+function drawPaper(ctx, bw, bh, padX, padY, k, color) {
+  ctx.save();
+  ctx.rotate((-3 * Math.PI) / 180);
+  ctx.shadowColor = "rgba(0,0,0,0.22)";
+  ctx.shadowBlur = 24 * k;
+  ctx.shadowOffsetY = 8 * k;
+  ctx.fillStyle = "#fffaf0";
+  roundRect(ctx, -bw / 2 - padX, -bh / 2 - padY, bw + padX * 2, bh + padY * 2, 22 * k);
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.globalAlpha = 0.6; // マスキングテープ
+  ctx.fillStyle = lightColor(color) ? "#f4b740" : color;
+  ctx.rotate((5 * Math.PI) / 180);
+  ctx.fillRect(-90 * k, -bh / 2 - padY - 26 * k, 180 * k, 52 * k);
+  ctx.restore();
+}
+
+// 後ろの飾り：まるバッジ（色の丸と、内側の白い点線）
+function drawBadge(ctx, bw, bh, k, color) {
+  const r = badgeR(bw, bh, k);
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.25)";
+  ctx.shadowBlur = 24 * k;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.lineWidth = 8 * k;
+  ctx.setLineDash([2 * k, 16 * k]);
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(0, 0, r - 22 * k, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// 字の影の重ね方（テンプレートごと）。影なしは [null]
+function textPasses(tpl, color, k) {
+  if (tpl.glow) return [{ color: "rgba(0,0,0,0.28)", blur: 14 * k }, { color, blur: 34 * k }];
+  if (tpl.shade) return [{ color: "rgba(0,0,0,0.4)", blur: 18 * k }];
+  if (tpl.stroke) return [{ color: "rgba(0,0,0,0.2)", blur: 6 * k, dy: 8 * k }];
+  return [null];
+}
+
+// ポップ：上の行は色の帯の中に白い字
+function drawTopPill(ctx, tpl, r, x, baseline, color) {
+  ctx.save();
+  ctx.fillStyle = tpl.stroke(color);
+  const ph = r.h * 1.3;
+  roundRect(ctx, x - r.h * 0.6, baseline - r.h * 0.95, r.w + r.h * 1.2, ph, ph / 2);
+  ctx.fill();
+  ctx.font = r.parts[0].font;
+  ctx.fillStyle = "#fff";
+  ctx.fillText(r.parts[0].text, x, baseline);
+  ctx.restore();
+}
+
+// エレガント：上の行の左右に細い線
+function drawRules(ctx, r, x, baseline, k, color) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3 * k;
+  const my = baseline - r.h * 0.35;
+  ctx.beginPath();
+  ctx.moveTo(x - 110 * k, my);
+  ctx.lineTo(x - 26 * k, my);
+  ctx.moveTo(-x + 26 * k, my);
+  ctx.lineTo(-x + 110 * k, my);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// 行を上から描く（字の下のそろえ方は alphabetic。大きな数字の行は、字の下をそろえる）
+function drawRows(ctx, tpl, rows, bh, k, color, t, wave) {
   ctx.textBaseline = "alphabetic";
   ctx.textAlign = "left";
-  const passes = [];
-  if (tpl.glow) passes.push({ color: "rgba(0,0,0,0.28)", blur: 14 * k }, { color, blur: 34 * k });
-  else if (tpl.shade) passes.push({ color: "rgba(0,0,0,0.4)", blur: 18 * k });
-  else if (tpl.stroke) passes.push({ color: "rgba(0,0,0,0.2)", blur: 6 * k, dy: 8 * k });
-  else passes.push(null);
-
+  const passes = textPasses(tpl, color, k);
   let y = -bh / 2;
   for (const r of rows) {
     const lh = r.h * (r.main ? LINE.big : r.parts[0].name === "top" ? LINE.top : LINE.foot);
     const baseline = y + lh * (r.main ? 0.86 : 0.8);
     let x = -r.w / 2;
-    // ポップ：上の行は色の帯の中に白い字
     if (tpl.topPill && r.kind === "top") {
-      ctx.save();
-      ctx.fillStyle = tpl.stroke(color);
-      const ph = r.h * 1.3;
-      roundRect(ctx, x - r.h * 0.6, baseline - r.h * 0.95, r.w + r.h * 1.2, ph, ph / 2);
-      ctx.fill();
-      ctx.font = r.parts[0].font;
-      ctx.fillStyle = "#fff";
-      ctx.fillText(r.parts[0].text, x, baseline);
-      ctx.restore();
+      drawTopPill(ctx, tpl, r, x, baseline, color);
       y += lh;
       continue;
     }
-    // エレガント：上の行の左右に細い線
-    if (tpl.rules && r.kind === "top") {
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 3 * k;
-      const my = baseline - r.h * 0.35;
-      ctx.beginPath();
-      ctx.moveTo(x - 110 * k, my);
-      ctx.lineTo(x - 26 * k, my);
-      ctx.moveTo(-x + 26 * k, my);
-      ctx.lineTo(-x + 110 * k, my);
-      ctx.stroke();
-      ctx.restore();
-    }
+    if (tpl.rules && r.kind === "top") drawRules(ctx, r, x, baseline, k, color);
     for (const p of r.parts) {
       for (const pass of passes) {
         ctx.save();
@@ -543,13 +353,35 @@ function drawLabel(ctx, W, H, look, label, t, still) {
           ctx.shadowBlur = pass.blur;
           ctx.shadowOffsetY = pass.dy || 0;
         }
-        drawText(ctx, tpl, p, p.text, x, baseline, color, k, t, !still && look.motion === "wave");
+        drawText(ctx, tpl, p, p.text, x, baseline, color, k, t, wave);
         ctx.restore();
       }
       x += p.w + r.space;
     }
     y += lh;
   }
+}
+
+// 文字のまとまりを (cx, cy) を真ん中に描く。返すのは、ドラッグに使う範囲
+function drawLabel(ctx, W, H, look, label, t, still) {
+  const tpl = tplOf(look.tpl);
+  const color = look.color;
+  const base = Math.min(W, H) / 1080;
+  const shown = countingLabel(label, look, t, still);
+  let box = fitLabel(ctx, tpl, shown, label, base * (tpl.fixed ? 1 : look.size), W);
+  let cx, cy;
+  if (tpl.frame) ({ cx, cy, ...box } = frameLabel(ctx, tpl, shown, W, H, box));
+  else [cx, cy] = labelCenter(look, tpl, W, H, box);
+  const { k, rows, bw, bh } = box;
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  applyMotion(ctx, look, tpl, t, still, base);
+  // 後ろの飾り
+  const padX = 60 * k, padY = 44 * k;
+  if (tpl.paper) drawPaper(ctx, bw, bh, padX, padY, k, color);
+  if (tpl.circle) drawBadge(ctx, bw, bh, k, color);
+  drawRows(ctx, tpl, rows, bh, k, color, t, !still && look.motion === "wave");
   ctx.restore();
   return { x: cx - bw / 2 - padX, y: cy - bh / 2 - padY, w: bw + padX * 2, h: bh + padY * 2, fixed: !!tpl.fixed };
 }

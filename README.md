@@ -38,7 +38,7 @@
 | おなかの中 | 24週 3日／24w3d／あと◯日 | 予定日を 40週0日 として数える |
 | 記念日 | 100日目／1年 2か月 | 「付き合った日から 100日目」。記念日の名前（なければ「記念日」）＋「から」。その日より前は「◯◯まで あと◯日」。節目は 100・200・300・500・1000・2000・3000・5000・10000日と 1〜10周年 |
 
-## 文字の形（js/draw.js）
+## 文字の形（js/draw.js・js/stamps.js）
 
 - テンプレート（TEMPLATES）：ふんわり・ポップ・てがき・エレガント・まるバッジ・フレーム。字（Google Fonts）・位置・飾りがテンプレートごと
 - 色（8色と、好きな色）・大きさ・位置（指で動かす）・いっしょに入れる（なまえ・日付・うまれたときの記録）
@@ -56,8 +56,8 @@
 
 - index.html・style.css：画面（部品はおくるんの Q キット `https://katsuan.github.io/line-share/shared/ui.css`。色は style.css の :root でピーチ）
 - app.js：画面の入口（最初の表示と毎フレームの描画）
-- js/（index.html でこの順に読む）：count.js 日付と数え ／ store.js 端末に残す（suqsuq:state） ／ link.js リンクで日付を受けとる・くろのすへのリンク ／ ui.js 画面の小さな道具 ／ draw.js 描く（テンプレート・スタンプ・動き） ／ setup.js はじめの画面 ／ calendar.js 節目をカレンダーに ／ shoot.js 撮る画面
-- js/core.js・js/main.js：前の名前のファイル。前の index.html を覚えているブラウザのために、新しいファイルを読むだけ。2026-11-25 ごろ消す
+- js/（index.html でこの順に読む）：count.js 日付と数え ／ store.js 端末に残す（suqsuq:state） ／ link.js リンクで日付を受けとる・くろのすへのリンク ／ ui.js 画面の小さな道具 ／ draw.js 描く（テンプレート・文字・動き） ／ stamps.js 動くスタンプ ／ setup.js はじめの画面 ／ calendar.js 節目をカレンダーに ／ shoot.js 撮る画面
+- js/core.js・js/main.js：前の名前のファイル。前の index.html を覚えているブラウザのために、新しいファイルを読むだけ（main.js は js/stamps.js も）。2026-11-25 ごろ消す
 - test/：端末に残した中身・リンクの読みこみ、日数の計算、カレンダーのファイル、読みこみの印（?v=）のテスト（`node --test test/`）
 - 公開は GitHub Actions（`.github/workflows/pages.yml`。中身は Q 共通の line-share の `q-pages.yml`）。push すると、テストと check-code が通ったときだけ Pages に出す。読みこむ JS・CSS・ロゴ・アイコンの `?v=` は公開のときに付くので、手で付けなくてよい
 - tools/icon.py：アイコン・ロゴ・OGP（おくるんの tools/brandkit.py。ピーチの角丸に、ふたばの芽が出た Q。横ロゴ logo.svg は「SuQ²」：ふたばの Q の右上に小さな 2）

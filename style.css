@@ -167,7 +167,8 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 @media (max-width: 359px) {
   .ls-tab:has(> .ls-icon) { flex-direction: column; gap: 2px; padding-block: var(--ls-space-xs); }
 }
-.ls-panel-title .ls-icon, .sheet-title .ls-icon, .qronos-links .ls-hint .ls-icon, .day-badge .ls-icon { margin-right: var(--ls-space-xs); }
+/* 見出し（ls-panel-title）と案内（ls-hint）の頭のアイコンの間は Q キットが取る。ここはキットの部品でないものだけ */
+.sheet-title .ls-icon, .day-badge .ls-icon { margin-right: var(--ls-space-xs); }
 .design-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: var(--ls-space-xs); }
 .design-tabs .ls-icon { width: 16px; height: 16px; }
 .round .ls-icon { width: 24px; height: 24px; }

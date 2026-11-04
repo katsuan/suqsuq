@@ -393,8 +393,8 @@ let motionStart = performance.now();
 // 文字の動き（ぽよん・カウントアップ）を、はじめから動かしなおす
 const restartMotion = () => (motionStart = performance.now());
 
-// はじめの画面のボタン・欄をつなぐ（はじめに一度）
-function bindSetup() {
+// 数えかたのタブ（生まれて・おなかの中・記念日）と、文字の形のタブ
+function bindSetupTabs() {
   document.querySelectorAll("[data-mode]").forEach((b) =>
     b.addEventListener("click", () => {
       state.mode = b.dataset.mode;
@@ -409,28 +409,10 @@ function bindSetup() {
       renderDesignTab();
     })
   );
-  $("name").value = state.name;
-  $("memo").value = state.memo;
-  $("saveRaw").checked = state.saveRaw;
-  $("saveRaw").addEventListener("change", () => {
-    state.saveRaw = $("saveRaw").checked;
-    save();
-    toast(state.saveRaw ? "加工なしの元の写真・動画も残します" : "文字・スタンプ入りだけ残します");
-  });
-  $("memo").addEventListener("input", () => {
-    state.memo = $("memo").value;
-    save();
-    renderExamples();
-  });
-  for (const id of ["bTime", "bWeight", "bLength"]) {
-    $(id).value = state[id];
-    $(id).addEventListener("input", () => {
-      state[id] = $(id).value.trim();
-      save();
-      renderStatsMeta();
-    });
-  }
-  renderStatsMeta();
+}
+
+// なまえ・日付・記念日の名前・「1日目から数える」の欄
+function bindSetupWho() {
   $("birth").value = state.birth;
   $("due").value = state.due;
   $("since").value = state.since;
@@ -456,6 +438,16 @@ function bindSetup() {
       renderCalendar();
     });
   }
+  $("dayOne").addEventListener("change", () => {
+    state.dayOne = $("dayOne").checked;
+    save();
+    renderToday();
+    renderCalendar();
+  });
+}
+
+// 数える日（前に撮った写真に入れるとき）
+function bindSetupDay() {
   $("day").addEventListener("change", () => {
     state.day = $("day").value === todayStr() ? "" : $("day").value;
     renderAll();
@@ -464,12 +456,33 @@ function bindSetup() {
     state.day = "";
     renderAll();
   });
-  $("dayOne").addEventListener("change", () => {
-    state.dayOne = $("dayOne").checked;
+}
+
+// ひとこと・うまれたときの記録・加工なしも保存
+function bindSetupText() {
+  $("saveRaw").addEventListener("change", () => {
+    state.saveRaw = $("saveRaw").checked;
     save();
-    renderToday();
-    renderCalendar();
+    toast(state.saveRaw ? "加工なしの元の写真・動画も残します" : "文字・スタンプ入りだけ残します");
   });
+  $("memo").addEventListener("input", () => {
+    state.memo = $("memo").value;
+    save();
+    renderExamples();
+  });
+  for (const id of ["bTime", "bWeight", "bLength"]) {
+    $(id).value = state[id];
+    $(id).addEventListener("input", () => {
+      state[id] = $(id).value.trim();
+      save();
+      renderStatsMeta();
+    });
+  }
+  renderStatsMeta();
+}
+
+// 文字の大きさ・まん中にもどす・見本の文字を指で動かす
+function bindSetupLook() {
   $("size").addEventListener("input", () => {
     state.look.size = Number($("size").value);
     save();
@@ -480,6 +493,18 @@ function bindSetup() {
     lookChanged();
   });
   attachDrag($("preview"), () => previewBox);
+}
+
+// はじめの画面のボタン・欄をつなぐ（はじめに一度）
+function bindSetup() {
+  $("name").value = state.name;
+  $("memo").value = state.memo;
+  $("saveRaw").checked = state.saveRaw;
+  bindSetupTabs();
+  bindSetupWho();
+  bindSetupDay();
+  bindSetupText();
+  bindSetupLook();
   // 入力中は下の帯を隠す（キーボードと重ならないように。Q キットの body.is-typing）
   document.addEventListener("focusin", (e) => e.target.matches("input:not([type=range]):not([type=checkbox])") && document.body.classList.add("is-typing"));
   document.addEventListener("focusout", () => document.body.classList.remove("is-typing"));
