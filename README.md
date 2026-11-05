@@ -58,7 +58,7 @@
 - app.js：画面の入口（最初の表示と毎フレームの描画）
 - js/（index.html でこの順に読む）：count.js 日付と数え ／ store.js 端末に残す（suqsuq:state） ／ link.js リンクで日付を受けとる・くろのすへのリンク ／ ui.js 画面の小さな道具 ／ draw.js 描く（テンプレート・文字・動き） ／ stamps.js 動くスタンプ ／ setup.js はじめの画面 ／ calendar.js 節目をカレンダーに ／ shoot.js 撮る画面
 - js/core.js・js/main.js：前の名前のファイル。前の index.html を覚えているブラウザのために、新しいファイルを読むだけ（main.js は js/stamps.js も）。2026-11-25 ごろ消す
-- test/：端末に残した中身・リンクの読みこみ、日数の計算、カレンダーのファイル、読みこみの印（?v=）のテスト（`node --test test/`）
+- テストは、公開しない別の所に置いています（公開の前に GitHub Actions が読んで動かします）
 - 公開は GitHub Actions（`.github/workflows/pages.yml`。中身は Q 共通の line-share の `q-pages.yml`）。push すると、テストと check-code が通ったときだけ Pages に出す。読みこむ JS・CSS・ロゴ・アイコンの `?v=` は公開のときに付くので、手で付けなくてよい
 - tools/icon.py：アイコン・ロゴ・OGP（おくるんの tools/brandkit.py。ピーチの角丸に、ふたばの芽が出た Q。横ロゴ logo.svg は「SuQ²」：ふたばの Q の右上に小さな 2）
 
