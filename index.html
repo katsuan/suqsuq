@@ -28,8 +28,8 @@
 <!-- 画面の字（丸ゴシック）と、写真に入れる字（テンプレートごと。js/draw.js の FONTS） -->
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&family=Mochiy+Pop+One&family=Yomogi&family=Shippori+Mincho:wght@600&family=Cormorant+Garamond:ital,wght@1,600&family=Jua&display=swap" rel="stylesheet">
 <!-- Q キット（おくるんの共通部品）。色と字は style.css の :root で、すくすくのピーチに -->
-<link rel="stylesheet" href="https://katsuan.github.io/line-share/shared/ui.css?v=202610261000">
-<script src="https://katsuan.github.io/line-share/shared/ui.js" defer></script>
+<link rel="stylesheet" href="https://katsuan.github.io/oqrn/shared/ui.css?v=202610261000">
+<script src="https://katsuan.github.io/oqrn/shared/ui.js" defer></script>
 <link rel="stylesheet" href="style.css?v=202610291806">
 </head>
 <body class="ls-has-sendbar">
@@ -199,7 +199,7 @@
     </div>
   </section>
 
-  <!-- 「📤 すくすくを紹介する」と仲間のアイコン列：おくるんで紹介カードを送る窓口（line-share/shared/tool-share.js。中身は line-share/data/hub-links.json） -->
+  <!-- 「📤 すくすくを紹介する」と仲間のアイコン列：おくるんで紹介カードを送る窓口（oqrn/shared/tool-share.js。中身は oqrn/data/hub-links.json） -->
   <div data-tool-share></div>
 </main>
 
@@ -282,6 +282,6 @@
 <script src="app.js?v=202610291806"></script>
 <!-- 電波がなくても開けるように（sw.js） -->
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});</script>
-<script src="https://katsuan.github.io/line-share/shared/tool-share.js" data-tool="suqsuq" defer></script>
+<script src="https://katsuan.github.io/oqrn/shared/tool-share.js" data-tool="suqsuq" defer></script>
 </body>
 </html>
