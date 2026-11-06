@@ -46,7 +46,7 @@ const upcomingMilestone = (s) => milestoneList({ ...s, day: "" }).find((m) => m.
 
 // くろのす（Qronos）で「あと何日？」を数えるページ。日付・名前を入れた状態で開く
 // おなかの中：出産予定日まで。生まれてから：つぎの節目まで・毎年の誕生日
-const QRONOS_URL = "https://katsuan.github.io/countdown/index.html";
+const QRONOS_URL = "https://katsuan.github.io/qronos/index.html";
 // くろのすで「あと何日？」を数えるページのリンク（{ label, url } の並び）。日付がなければ空
 function qronosLinks(s = state) {
   const who = s.name ? `${s.name}の` : "";
