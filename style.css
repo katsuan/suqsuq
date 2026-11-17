@@ -54,11 +54,11 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .cal-text span { display: grid; min-width: 0; }
 .cal-text b { font-size: 14px; }
 .cal-text small { font-size: 12px; color: var(--ink-soft); }
-.cal-g { flex: none; padding: var(--ls-space-s) var(--ls-space-m); border: 1px solid var(--ls-line-strong, #ccc); border-radius: 999px; color: var(--ink); font-size: 12px; font-weight: 800; text-decoration: none; background: #fff; }
+.cal-g { flex: none; padding: var(--ls-space-s) var(--ls-space-m); border: 1px solid var(--ls-line-strong, #ccc); border-radius: 999px; color: var(--ink); font-size: 12px; font-weight: 700; text-decoration: none; background: #fff; }
 
 /* 文字の形のタブ（形・文字・かざり・保存） */
 .design-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--ls-space-xs); padding: var(--ls-space-xs); border-radius: 14px; background: var(--ls-tabs-bg); }
-.design-tabs button { min-height: 40px; padding: 0 var(--ls-space-xs); border: 0; border-radius: 10px; background: transparent; color: var(--ink-soft); font: inherit; font-size: 13px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.design-tabs button { min-height: 40px; padding: 0 var(--ls-space-xs); border: 0; border-radius: 10px; background: transparent; color: var(--ink-soft); font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
 .design-tabs button[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(80, 40, 30, 0.1); }
 .design-group { display: grid; gap: var(--ls-space-m); }
 /* 日付がまだないとき、日付の欄を光らせる */
@@ -86,10 +86,10 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 .shoot-top { display: flex; align-items: center; gap: var(--ls-space-s); padding: var(--ls-space-s) var(--ls-space-m); }
 .shoot-top .seg { margin: 0 auto; }
 .seg { display: inline-flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); }
-.seg button { min-height: 36px; padding: 0 var(--ls-space-m); border: 0; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 14px; font-weight: 800; }
+.seg button { min-height: 36px; padding: 0 var(--ls-space-m); border: 0; border-radius: 999px; background: transparent; color: #fff; font: inherit; font-size: 14px; font-weight: 700; }
 .seg button[aria-pressed="true"] { background: #fff; color: var(--ink); }
 .round { flex: none; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.16); color: #fff; font: inherit; font-size: 20px; cursor: pointer; }
-.round.wide { width: auto; padding: 0 var(--ls-space-m); border-radius: 999px; font-size: 13px; font-weight: 800; }
+.round.wide { width: auto; padding: 0 var(--ls-space-m); border-radius: 999px; font-size: 13px; font-weight: 700; }
 .shoot-stage { position: relative; display: grid; place-items: center; min-height: 0; padding: 0 var(--ls-space-s); }
 /* 映像は、上下のボタンのあいだに収まる大きさ（js/shoot.js の fitStage で幅・高さを決める。キャンバスの元の大きさで押し広げない） */
 .shoot-stage { overflow: hidden; }
@@ -98,12 +98,12 @@ input.date::-webkit-date-and-time-value { text-align: left; }
 @keyframes flash { from { filter: brightness(2.2); } to { filter: none; } }
 /* 構図のガイド（前の写真をうっすら）と、セルフタイマーの数字 */
 .guide { position: absolute; object-fit: cover; opacity: 0.35; border-radius: 10px; pointer-events: none; }
-.countdown { position: absolute; margin: 0; font-size: 120px; font-weight: 800; color: #fff; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); pointer-events: none; }
+.countdown { position: absolute; margin: 0; font-size: 120px; font-weight: 700; color: #fff; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); pointer-events: none; }
 .round.small-label { display: grid; place-items: center; align-content: center; gap: 0; width: 52px; height: 52px; font-size: 18px; line-height: 1; }
-.round.small-label small { font-size: 10px; font-weight: 800; margin-top: 2px; }
+.round.small-label small { font-size: 10px; font-weight: 700; margin-top: 2px; }
 .round.is-on { background: #fff; color: var(--ink); }
-.day-badge { position: absolute; top: 8px; left: 16px; margin: 0; padding: var(--ls-space-xs) var(--ls-space-s); border-radius: 999px; background: rgba(0, 0, 0, 0.55); font-size: 12px; font-weight: 800; pointer-events: none; }
-.rec-time { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); margin: 0; padding: var(--ls-space-xs) var(--ls-space-s); border-radius: 999px; background: #e53935; font-weight: 800; font-variant-numeric: tabular-nums; }
+.day-badge { position: absolute; top: 8px; left: 16px; margin: 0; padding: var(--ls-space-xs) var(--ls-space-s); border-radius: 999px; background: rgba(0, 0, 0, 0.55); font-size: 12px; font-weight: 700; pointer-events: none; }
+.rec-time { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); margin: 0; padding: var(--ls-space-xs) var(--ls-space-s); border-radius: 999px; background: #e53935; font-weight: 700; font-variant-numeric: tabular-nums; }
 .shoot-msg, .drag-hint { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; padding: var(--ls-space-s) var(--ls-space-m); border-radius: var(--ls-radius-lg); background: rgba(0, 0, 0, 0.7); font-size: 14px; line-height: 1.6; text-align: center; width: max-content; max-width: calc(100% - 40px); pointer-events: none; }
 .shoot-msg { top: 40%; }
 .drag-hint { bottom: 16px; }
