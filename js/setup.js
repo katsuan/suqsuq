@@ -280,7 +280,7 @@ function qronosRow() {
   const links = qronosLinks();
   if (!links.length) return "";
   return (
-    `<div class="qronos-links"><span class="ls-hint"><span class="ls-icon" data-icon="wait" aria-hidden="true"></span>くろのすで数える</span>` +
+    `<div class="qronos-links"><span class="ls-hint"><span class="ls-icon" data-icon="wait" aria-hidden="true"></span>${NAMES.qronos}で数える</span>` +
     links.map((l) => `<a class="ls-chip is-small" href="${escHtml(l.url)}" target="_blank" rel="noopener"><span class="ls-icon" data-icon="${escHtml(l.icon)}" aria-hidden="true"></span>${escHtml(l.label)}</a>`).join("") +
     "</div>"
   );

@@ -51,7 +51,7 @@ function milestoneList(s = state) {
 // カレンダーの予定の名前（「🌱 はると 生まれて100日（お食い初め）」）
 const eventTitle = (m, s = state) => `🌱 ${s.name ? s.name + " " : ""}${m.label}${m.note ? `（${m.note}）` : ""}`;
 // カレンダーの予定のメモ（すくすくへのリンク）
-const eventDetails = () => `すくすくで、きょうの写真を撮ろう\n${PAGE_URL}`;
+const eventDetails = () => `${NAMES.app}で、きょうの写真を撮ろう\n${PAGE_URL}`;
 // 日付を数字だけにする（2026-10-22 → 20261022）
 const compact = (d) => d.replace(/-/g, "");
 // 次の日（数字だけの形）。終日の予定の終わりに使う
@@ -77,7 +77,7 @@ function icsFor(list, s = state) {
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
   // お知らせの時間（決めた「当日の朝」などの、0 時からのずれ）
   const trigger = (REMINDS.find((r) => r.id === s.remind) || REMINDS[0]).trigger;
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//katsuan//suqsuq//JA", "CALSCALE:GREGORIAN", "X-WR-CALNAME:すくすく"];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//katsuan//suqsuq//JA", "CALSCALE:GREGORIAN", `X-WR-CALNAME:${NAMES.app}`];
   for (const m of list) {
     lines.push(
       "BEGIN:VEVENT",
